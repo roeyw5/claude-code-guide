@@ -1,0 +1,17 @@
+# Environment
+.env
+.env.*
+.env.local
+
+# Claude local files
+.claude/
+CLAUDE.local.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
