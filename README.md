@@ -49,12 +49,14 @@
    - [Skill Structure](#skill-structure)
    - [Frontmatter Options](#frontmatter-options)
    - [When NOT to Use Skills](#when-not-to-use-skills)
+   - [Included Skills](#included-skills)
 7. [Sub-Agents](#sub-agents)
    - [Why Isolation Matters](#why-isolation-matters)
    - [Built-in Sub-Agents](#built-in-sub-agents)
    - [Creating Custom Sub-Agents](#creating-custom-sub-agents)
    - [Async Execution](#async-execution)
    - [Sub-Agent Best Practices](#sub-agent-best-practices)
+   - [Included Agents](#included-agents)
 8. [Hooks](#hooks)
    - [Hook Events](#hook-events)
    - [Exit Codes & Decisions](#exit-codes--decisions)
@@ -721,6 +723,20 @@ Always ask what type of application before generating.
 | Heavy analysis that blocks main work | Use a Sub-Agent          |
 | Simple one-off task                  | Just ask Claude directly |
 
+### Included Skills
+
+This repo ships with ready-to-use skills in [`.claude/skills/`](.claude/skills/). Clone the repo and they work immediately as `/slash-commands`:
+
+| Command | Description |
+| ------- | ----------- |
+| `/commit` | Conventional commit messages with proper formatting |
+| `/doublecheck` | Cross-check technical claims using a secondary LLM |
+| `/update` | Update a PROGRESS.md file with session changes |
+| `/weekly-summary` | Structured meeting summaries in Obsidian-compatible Markdown |
+| `/article-review-full` | Comprehensive article review (orchestrates tech + editorial) |
+| `/article-review-tech` | Technical accuracy verification |
+| `/article-review-editorial` | Grammar, flow, and SEO review |
+
 ### Documentation & Guides
 
 - [Claude Code Tutorials](https://docs.anthropic.com/en/docs/claude-code/tutorials) - Examples including skill creation
@@ -920,6 +936,20 @@ Ask what type of documentation is needed before starting.
 - Use agents for simple tasks (overhead not worth it)
 - Expect agents to share state with main conversation
 
+### Included Agents
+
+This repo includes 5 specialized agents in [`.claude/agents/`](.claude/agents/) that power the article review system. They demonstrate different model choices and tool restrictions:
+
+| Agent | Model | Purpose |
+| ----- | ----- | ------- |
+| `article-review-technical-verifier` | Sonnet | Verify technical claims against official docs |
+| `article-review-code-examples-checker` | Sonnet | Validate code examples compile and run correctly |
+| `article-review-grammar-editor` | Haiku | Fix grammar, spelling, and tone |
+| `article-review-flow-reviewer` | Sonnet | Check logical flow and structure |
+| `article-review-seo-optimizer` | Haiku | Optimize headings, metadata, and keywords |
+
+See the [Article Review Team README](examples/article-review-team/README.md) for the full architecture walkthrough.
+
 ### Useful Resources
 
 - [Sub-Agents Documentation](https://docs.anthropic.com/en/docs/claude-code/sub-agents) - Complete guide to creating specialized agents
@@ -1037,7 +1067,7 @@ Hooks run synchronously—Claude waits for them. `PreToolUse` fires on _every_ t
 
 ### Starter Kit: Try It Yourself
 
-Download ready-to-use safety hooks from the [`hooks-starter-kit/`](hooks-starter-kit/) folder:
+Download ready-to-use safety hooks from the [`.claude/hooks/`](.claude/hooks/) folder:
 
 **Included hooks:**
 
@@ -1046,7 +1076,7 @@ Download ready-to-use safety hooks from the [`hooks-starter-kit/`](hooks-starter
 
 Both hooks have configurable safety levels (critical, high, strict) and log all blocked operations to `~/.claude/hooks-logs/`.
 
-See the [Hooks Starter Kit README](hooks-starter-kit/README.md) for installation instructions.
+See the [Hooks README](.claude/hooks/README.md) for installation instructions.
 
 ### Defense in Depth
 

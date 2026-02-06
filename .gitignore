@@ -4,7 +4,7 @@
 .env.local
 
 # Claude local files
-.claude/
+.claude/settings.local.json
 CLAUDE.local.md
 
 # OS files
