@@ -4,7 +4,7 @@
 
 ![Claude Code Fundamentals Banner](images/hero-banner.png)
 
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-v1.0-7c3aed?style=for-the-badge&logo=anthropic&logoColor=white)](https://code.claude.com)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-v1.1-7c3aed?style=for-the-badge&logo=anthropic&logoColor=white)](https://code.claude.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![Last Updated](https://img.shields.io/badge/Updated-March%202026-blue?style=for-the-badge)]()
 
