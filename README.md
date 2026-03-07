@@ -6,11 +6,11 @@
 
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-v1.0-7c3aed?style=for-the-badge&logo=anthropic&logoColor=white)](https://code.claude.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Last Updated](https://img.shields.io/badge/Updated-January%202026-blue?style=for-the-badge)]()
+[![Last Updated](https://img.shields.io/badge/Updated-March%202026-blue?style=for-the-badge)]()
 
 **A comprehensive guide to Claude Code—Anthropic's agentic coding tool.**
 
-[Getting Started](#what-is-claude-code) • [Memory](#claudemd-memory--configuration) • [Context](#context-management) • [Plan Mode](#plan-mode) • [Skills](#skills) • [Sub-Agents](#sub-agents) • [Hooks](#hooks)
+[Getting Started](#what-is-claude-code) • [Memory](#claudemd-memory--configuration) • [Context](#context-management) • [Plan Mode](#plan-mode) • [Skills](#skills) • [Sub-Agents](#sub-agents) • [Hooks](#hooks) • [New Features](#new--experimental-features)
 
 </div>
 
@@ -19,50 +19,16 @@
 ## Table of Contents
 
 1. [What is Claude Code?](#what-is-claude-code)
-   - [Why Claude Code?](#why-claude-code)
-   - [Using a Different Tool?](#using-a-different-tool)
-   - [Installation](#installation)
-   - [Human-in-the-Loop: Permission Tiers](#human-in-the-loop-permission-tiers)
-   - [Essential Commands](#essential-commands)
 2. [CLAUDE.md: Memory & Configuration](#claudemd-memory--configuration)
-   - [The Memory Hierarchy](#the-memory-hierarchy)
-   - [Global vs Project CLAUDE.md](#global-vs-project-claudemd)
-   - [The Rules Directory](#the-rules-directory)
-   - [Importing External Files](#importing-external-files)
-   - [The Learning Loop](#the-learning-loop)
-   - [Scaffolding: Your Project Factory](#scaffolding-your-project-factory)
-   - [Protecting Sensitive Files](#protecting-sensitive-files)
 3. [Context Management](#context-management)
-   - [When to Reset](#when-to-reset)
-   - [Context Commands](#context-commands)
-   - [Persisting Context Across Sessions](#persisting-context-across-sessions)
 4. [Plan Mode](#plan-mode)
-   - [When to Use Plan Mode](#when-to-use-plan-mode)
-   - [How It Works](#how-it-works)
-   - [The Plan Mode Workflow](#the-plan-mode-workflow)
 5. [Extending Claude Code](#extending-claude-code)
-   - [The Three Mechanisms](#the-three-mechanisms)
-   - [Quick Decision Guide](#quick-decision-guide)
 6. [Skills](#skills)
-   - [How Skills Work](#how-skills-work)
-   - [Creating Skills](#creating-skills)
-   - [Skill Structure](#skill-structure)
-   - [Frontmatter Options](#frontmatter-options)
-   - [When NOT to Use Skills](#when-not-to-use-skills)
-   - [Included Skills](#included-skills)
 7. [Sub-Agents](#sub-agents)
-   - [Why Isolation Matters](#why-isolation-matters)
-   - [Built-in Sub-Agents](#built-in-sub-agents)
-   - [Creating Custom Sub-Agents](#creating-custom-sub-agents)
-   - [Async Execution](#async-execution)
-   - [Sub-Agent Best Practices](#sub-agent-best-practices)
-   - [Included Agents](#included-agents)
 8. [Hooks](#hooks)
-   - [Hook Events](#hook-events)
-   - [Exit Codes & Decisions](#exit-codes--decisions)
-   - [Configuration](#configuration)
-   - [Starter Kit](#starter-kit-try-it-yourself)
-   - [Defense in Depth](#defense-in-depth)
+9. [New / Experimental Features](#new--experimental-features)
+   - [Remote Control](#remote-control)
+   - [Agent Teams](#agent-teams)
 
 ---
 
@@ -576,6 +542,8 @@ Skills are reusable instructions that extend Claude's capabilities. They can be 
 
 This "progressive disclosure" keeps your context lean until expertise is actually needed.
 
+> ⚠️ **Skill character budget:** Descriptions scale with context window (~2% of context). If you have many skills, some may be excluded. Run `/context` to check for warnings.
+
 ### Creating Skills
 
 There are several ways to create a skill:
@@ -622,17 +590,45 @@ When reviewing code:
 4. Check for missing tests
 ```
 
-> ⚠️ **The description is the trigger.** Make it specific—Claude uses this to decide when to auto-activate the skill.
+> 💡 **The `description` is the trigger.** Make it specific — Claude uses this to decide when to auto-activate the skill. Anthropic notes that Claude tends to "undertrigger," so be a little pushy in descriptions (e.g., "Use this skill whenever the user mentions code quality, refactoring, or asks for a review").
 
 ### Frontmatter Options
 
-| Option                     | Purpose                     | Example                      |
-| -------------------------- | --------------------------- | ---------------------------- |
-| `name`                     | Creates `/name` command     | `code-review`                |
-| `description`              | When to auto-trigger        | `Review code for quality...` |
-| `allowed-tools`            | Restrict available tools    | `Read, Grep, Glob`           |
-| `model`                    | Use specific model          | `sonnet`, `opus`, `haiku`    |
-| `disable-model-invocation` | User-only (no auto-trigger) | `true`                       |
+| Option                     | Purpose                                                  | Example                      |
+| -------------------------- | -------------------------------------------------------- | ---------------------------- |
+| `name`                     | Creates `/name` command                                  | `code-review`                |
+| `description`              | When to auto-trigger                                     | `Review code for quality...` |
+| `allowed-tools`            | Restrict available tools                                 | `Read, Grep, Glob`           |
+| `model`                    | Use specific model                                       | `sonnet`, `opus`, `haiku`    |
+| `argument-hint`            | Shown in autocomplete after `/name`                      | `[file-path]`                |
+| `disable-model-invocation` | User-only — no auto-trigger                              | `true`                       |
+| `user-invocable`           | Set `false` to hide from `/` menu (background knowledge) | `false`                      |
+| `context`                  | Set `fork` to run in isolated subagent context           | `fork`                       |
+
+### Arguments and Dynamic Content
+
+Skills can accept user input and inject live data:
+
+| Syntax           | What It Does                         | Example                                    |
+| ---------------- | ------------------------------------ | ------------------------------------------ |
+| `$ARGUMENTS`     | Everything typed after `/skill-name` | `/deploy staging` → `$ARGUMENTS` = staging |
+| `$0`, `$1`, `$2` | Positional arguments                 | `/fix-issue 42` → `$0` = 42                |
+| `` !`command` `` | Inject bash output into prompt       | `` !`git status` ``                        |
+| `@path/to/file`  | Inject file contents into prompt     | `@README.md`                               |
+
+Example using dynamic content:
+
+```markdown
+---
+name: pr-status
+description: Summarize current PR changes
+---
+
+Current changes:
+!`git diff --stat`
+
+Summarize the changes above and suggest a PR title.
+```
 
 ### Naming Convention
 
@@ -644,9 +640,19 @@ Use prefixes to organize your `/` menu:
 | `gen-`    | `gen-readme`, `gen-tests`  |
 | `fix-`    | `fix-lint`, `fix-types`    |
 
+### Bundled Skills
+
+Claude Code ships with built-in skills available in every session:
+
+| Skill                  | What It Does                                                                                                                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/simplify`            | Reviews recently changed files for code reuse, quality, and efficiency. Spawns 3 parallel review agents, aggregates findings, applies fixes. Pass text to focus: `/simplify focus on memory efficiency` |
+| `/batch <instruction>` | Orchestrates large-scale changes across a codebase. Decomposes work into 5–30 independent units, spawns one agent per unit in isolated git worktrees                                                    |
+| `/claude-api`          | Loads Claude API reference for your project's language. Also auto-activates when your code imports Anthropic SDKs                                                                                       |
+
 ### Skill Example: Dockerfile Generator
 
-````markdown
+```markdown
 ---
 name: gen-dockerfile
 description: Generate production-ready Dockerfiles with security best practices
@@ -660,59 +666,22 @@ Generate a production-ready Dockerfile following these standards:
 ## Base Image
 
 - Use specific version tags, never `latest`
-- Prefer official images or verified publishers
-- Use minimal base images (alpine, distroless, slim)
+- Prefer minimal base images (alpine, distroless, slim)
 
 ## Security
 
-- Run as non-root user (create app user)
+- Run as non-root user
 - No secrets in build args or environment
-- Use multi-stage builds to minimize final image
-- Set appropriate file permissions
+- Use multi-stage builds
 
 ## Optimization
 
 - Order commands for optimal layer caching
 - Combine RUN commands to reduce layers
-- Use .dockerignore to exclude unnecessary files
 - Clean up package manager caches
 
-## Health Checks
-
-- Include HEALTHCHECK instruction
-- Set appropriate intervals and timeouts
-
-## Labels
-
-Include standard labels:
-
-```dockerfile
-LABEL org.opencontainers.image.source=""
-LABEL org.opencontainers.image.description=""
-LABEL org.opencontainers.image.version=""
-```
-````
-
-## Template by Type
-
-**Node.js:**
-
-- Multi-stage: build with node, run with node:alpine
-- Copy package\*.json first, then npm ci, then source
-- Use node user, not root
-
-**Python:**
-
-- Multi-stage: build with python, run with python:slim
-- Use pip install --no-cache-dir
-- Create virtualenv in final stage
-
-**Go:**
-
-- Multi-stage: build with golang, run with distroless/static
-- CGO_ENABLED=0 for static binary
-
 Always ask what type of application before generating.
+```
 
 ### When NOT to Use Skills
 
@@ -727,18 +696,19 @@ Always ask what type of application before generating.
 
 This repo ships with ready-to-use skills in [`.claude/skills/`](.claude/skills/). Clone the repo and they work immediately as `/slash-commands`:
 
-| Command | Description |
-| ------- | ----------- |
-| `/commit` | Conventional commit messages with proper formatting |
-| `/doublecheck` | Cross-check technical claims using a secondary LLM |
-| `/update` | Update a PROGRESS.md file with session changes |
-| `/weekly-summary` | Structured meeting summaries in Obsidian-compatible Markdown |
-| `/article-review-full` | Comprehensive article review (orchestrates tech + editorial) |
-| `/article-review-tech` | Technical accuracy verification |
-| `/article-review-editorial` | Grammar, flow, and SEO review |
+| Command                     | Description                                                  |
+| --------------------------- | ------------------------------------------------------------ |
+| `/commit`                   | Conventional commit messages with proper formatting          |
+| `/doublecheck`              | Cross-check technical claims using a secondary LLM           |
+| `/update`                   | Update a PROGRESS.md file with session changes               |
+| `/weekly-summary`           | Structured meeting summaries in Obsidian-compatible Markdown |
+| `/article-review-full`      | Comprehensive article review (orchestrates tech + editorial) |
+| `/article-review-tech`      | Technical accuracy verification                              |
+| `/article-review-editorial` | Grammar, flow, and SEO review                                |
 
 ### Documentation & Guides
 
+- [Skills Documentation](https://code.claude.com/docs/en/skills) - Official guide to creating and managing skills
 - [Claude Code Tutorials](https://docs.anthropic.com/en/docs/claude-code/tutorials) - Examples including skill creation
 - [Agent-Skills.md](https://agent-skills.md/) - Skills Marketplace
 - [YouTube Video](https://www.youtube.com/watch?v=-OnvD9McDt8) - Tutorial By Sean Kochel
@@ -940,13 +910,13 @@ Ask what type of documentation is needed before starting.
 
 This repo includes 5 specialized agents in [`.claude/agents/`](.claude/agents/) that power the article review system. They demonstrate different model choices and tool restrictions:
 
-| Agent | Model | Purpose |
-| ----- | ----- | ------- |
-| `article-review-technical-verifier` | Sonnet | Verify technical claims against official docs |
+| Agent                                  | Model  | Purpose                                          |
+| -------------------------------------- | ------ | ------------------------------------------------ |
+| `article-review-technical-verifier`    | Sonnet | Verify technical claims against official docs    |
 | `article-review-code-examples-checker` | Sonnet | Validate code examples compile and run correctly |
-| `article-review-grammar-editor` | Haiku | Fix grammar, spelling, and tone |
-| `article-review-flow-reviewer` | Sonnet | Check logical flow and structure |
-| `article-review-seo-optimizer` | Haiku | Optimize headings, metadata, and keywords |
+| `article-review-grammar-editor`        | Haiku  | Fix grammar, spelling, and tone                  |
+| `article-review-flow-reviewer`         | Sonnet | Check logical flow and structure                 |
+| `article-review-seo-optimizer`         | Haiku  | Optimize headings, metadata, and keywords        |
 
 See the [Article Review Team README](examples/article-review-team/README.md) for the full architecture walkthrough.
 
@@ -1111,6 +1081,193 @@ For absolute restrictions (Claude can't even attempt access):
 
 - [Hooks Reference](https://docs.anthropic.com/en/docs/claude-code/hooks) - Complete guide to hook events and configuration
 - [YouTube Video](https://www.youtube.com/watch?v=CEODfvJLIGQ) - Hooks overview by Mervin Praison
+
+---
+
+## New / Experimental Features
+
+These features are newer additions to Claude Code. Remote Control is generally available; Agent Teams is experimental and behind a feature flag.
+
+---
+
+### Remote Control
+
+Start a task at your desk, continue it from your phone. Remote Control connects claude.ai/code or the Claude app to a session running on **your machine**—your filesystem, MCP servers, and project config stay local.
+
+|                          | Remote Control        | Claude Code on the Web |
+| ------------------------ | --------------------- | ---------------------- |
+| **Where code runs**      | Your local machine    | Anthropic's cloud      |
+| **File access**          | Your local filesystem | Cloud sandbox          |
+| **MCP / Skills / Hooks** | Fully available       | Limited or unavailable |
+
+#### Starting a Remote Session
+
+```bash
+# New session from terminal
+claude remote-control "Refactor auth module"
+
+# Mid-conversation — preserves full context
+/rc
+```
+
+The terminal displays a **session URL** and **QR code** (spacebar to toggle). Open the URL in any browser, or scan with the Claude app.
+
+> 💡 **Use `/rc` when already in a session.** `claude remote-control` starts fresh; `/rc` carries over your conversation history.
+
+#### Connecting from Another Device
+
+| Method           | How                                                       |
+| ---------------- | --------------------------------------------------------- |
+| **Session URL**  | Open in any browser                                       |
+| **QR code**      | Scan with the Claude app (iOS/Android)                    |
+| **Session list** | Find in claude.ai/code — remote sessions show a green dot |
+
+Messages stay in sync across all connected devices — terminal, browser, and phone interchangeably.
+
+#### Flags (CLI only, not available with `/rc`)
+
+| Flag                         | Purpose                                       |
+| ---------------------------- | --------------------------------------------- |
+| `--name "text"`              | Custom session title in session list          |
+| `--verbose`                  | Detailed connection logs                      |
+| `--sandbox` / `--no-sandbox` | Filesystem/network isolation (off by default) |
+
+#### Resilience & Limitations
+
+| Behavior                        | Details                      |
+| ------------------------------- | ---------------------------- |
+| Sleep/wake, brief network drops | Auto-reconnects              |
+| ~10 min without network         | Process exits                |
+| Machine powers off              | Session ends — must restart  |
+| Concurrent sessions             | One per Claude Code instance |
+
+#### When to Use (and When Not To)
+
+| ✅ Use Remote Control                   | ❌ Skip It                                        |
+| --------------------------------------- | ------------------------------------------------- |
+| Long-running tasks — monitor from phone | Machine will be powered off — use cloud instead   |
+| Approve/reject PRs from the couch       | Detailed code review — phone screens are limiting |
+| Check deploy results from anywhere      | Need to add new MCP servers — do locally first    |
+
+#### Requirements
+
+| Requirement         | Details                                          |
+| ------------------- | ------------------------------------------------ |
+| **Plan**            | Pro, Max, Team, or Enterprise                    |
+| **Auth**            | Logged in via `/login` — API keys not supported  |
+| **Workspace trust** | Run `claude` in your project at least once first |
+
+> 💡 **Tip:** Run `/rename` before `/rc` to give your session a descriptive name in the session list.
+
+#### Best Practices
+
+| Practice                                           | Why                               |
+| -------------------------------------------------- | --------------------------------- |
+| Give detailed instructions before stepping away    | Less course-correction from phone |
+| Set up MCP servers before going remote             | Can't add servers from mobile     |
+| Use `/rc` mid-session, not `claude remote-control` | Preserves context                 |
+| Name sessions descriptively                        | Easy to find later                |
+
+#### Useful Resources
+
+- [Remote Control Documentation](https://code.claude.com/docs/en/remote-control) - Official setup guide and feature reference
+
+---
+
+### Agent Teams
+
+Agent Teams let you coordinate multiple Claude Code instances working together in parallel. One session acts as the **team lead**, spawning **teammates** that work independently, each in its own context window, and communicate directly with each other.
+
+> ⚠️ **Experimental feature** — disabled by default. Has known limitations around session resumption, task coordination, and shutdown.
+
+#### Agent Teams vs Sub-Agents
+
+|                   | Sub-Agents                                  | Agent Teams                                         |
+| ----------------- | ------------------------------------------- | --------------------------------------------------- |
+| **Communication** | Report back to main agent only              | Teammates message each other directly               |
+| **Coordination**  | Main agent manages everything               | Shared task list with self-coordination             |
+| **Best for**      | Focused tasks where only the result matters | Complex work requiring discussion and collaboration |
+| **Token cost**    | Lower — results summarized back             | Higher — each teammate is a full Claude instance    |
+
+**Rule of thumb:** Use sub-agents for quick, focused workers. Use agent teams when teammates need to share findings, challenge each other, and coordinate on their own.
+
+#### Architecture
+
+| Component     | Role                                                                 |
+| ------------- | -------------------------------------------------------------------- |
+| **Team Lead** | Your main session — creates team, assigns tasks, synthesizes results |
+| **Teammates** | Independent Claude Code instances with their own context windows     |
+| **Task List** | Shared work items with dependency tracking and auto-unblocking       |
+| **Mailbox**   | Direct messaging between agents (not just through the lead)          |
+
+Teammates load project context automatically (CLAUDE.md, MCP servers, skills) but do **not** inherit the lead's conversation history. They start fresh with only the spawn prompt.
+
+#### Enabling Agent Teams
+
+Add to `~/.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+```
+
+Then describe the team you want in natural language — no config files or schemas needed:
+
+```
+Create an agent team to review PR #142.
+Spawn three reviewers:
+- One focused on security implications
+- One checking performance impact
+- One validating test coverage
+Have them each review and report findings.
+```
+
+Claude creates the team, spawns teammates, and coordinates automatically.
+
+#### Display Modes
+
+| Mode                     | How It Works                                          | Best For                 |
+| ------------------------ | ----------------------------------------------------- | ------------------------ |
+| **In-process** (default) | All teammates in one terminal, Shift+Up/Down to cycle | Quick tasks, no tmux     |
+| **Split panes**          | Each teammate gets its own tmux/iTerm2 pane           | 3+ teammates, monitoring |
+| **Auto**                 | Detects your environment and picks accordingly        | Most users               |
+
+> 💡 **Split panes are worth the setup.** Seeing all teammates working simultaneously makes it much easier to spot problems as they happen.
+
+#### When to Use (and When Not To)
+
+| ✅ Use Agent Teams                                | ❌ Skip Them                                |
+| ------------------------------------------------- | ------------------------------------------- |
+| Multi-layer features (frontend + backend + tests) | Sequential tasks with many dependencies     |
+| Parallel code review from different angles        | Simple, single-file changes                 |
+| Debugging with competing hypotheses               | Routine tasks a single session handles fine |
+| Research/exploration from multiple perspectives   | Same-file edits (merge conflicts)           |
+
+#### Known Limitations
+
+| Limitation                                     | Workaround                                           |
+| ---------------------------------------------- | ---------------------------------------------------- |
+| No session resumption for in-process teammates | Tell the lead to spawn new teammates after `/resume` |
+| Task status can lag (blocks dependent tasks)   | Check manually, nudge the lead                       |
+| Shutdown can be slow                           | Teammates finish current work before stopping        |
+| One team per session                           | Clean up current team before starting a new one      |
+| No nested teams                                | Teammates cannot spawn their own teams               |
+
+#### Best Practices
+
+| Practice                                            | Why                                                      |
+| --------------------------------------------------- | -------------------------------------------------------- |
+| Plan first (Plan Mode), then hand off to the team   | Cheap planning phase before expensive parallel execution |
+| Define clear roles and file ownership per teammate  | Prevents merge conflicts and duplicated work             |
+| Start with 2–3 teammates, scale up as needed        | Prevents over-spawning and token waste                   |
+| Use sub-agents first, graduate to teams when needed | Only pay the coordination overhead when it adds value    |
+
+#### Useful Resources
+
+- [Agent Teams Documentation](https://code.claude.com/docs/en/agent-teams) - Official setup guide, use cases, and token cost guidance
 
 ---
 
