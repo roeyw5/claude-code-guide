@@ -10,7 +10,7 @@
 
 **A comprehensive guide to Claude Code—Anthropic's agentic coding tool.**
 
-[Getting Started](#what-is-claude-code) • [Memory](#claudemd-memory--configuration) • [Context](#context-management) • [Plan Mode](#plan-mode) • [Skills](#skills) • [Sub-Agents](#sub-agents) • [Hooks](#hooks) • [New Features](#new--experimental-features)
+[Getting Started](#what-is-claude-code) • [Memory](#claudemd-memory--configuration) • [Context](#context-management) • [Plan Mode](#plan-mode) • [Skills](#skills) • [Sub-Agents](#sub-agents) • [Hooks](#hooks) • [Bonus Features](#bonus-features)
 
 </div>
 
