@@ -26,7 +26,8 @@
 6. [Skills](#skills)
 7. [Sub-Agents](#sub-agents)
 8. [Hooks](#hooks)
-9. [New / Experimental Features](#new--experimental-features)
+9. [Bonus Features](#bonus-features)
+   - [Sandboxing](#sandboxing)
    - [Remote Control](#remote-control)
    - [Agent Teams](#agent-teams)
 
@@ -1084,9 +1085,16 @@ For absolute restrictions (Claude can't even attempt access):
 
 ---
 
-## New / Experimental Features
+## Bonus Features
 
-These features are newer additions to Claude Code. Remote Control is generally available; Agent Teams is experimental and behind a feature flag.
+---
+
+### Sandboxing
+
+For a deep dive on sandboxing Claude Code to run with minimal supervision, see:
+[Claude Code Sandboxing: Stop Babysitting Your AI Assistant](https://www.develeap.com/claude-code-sandboxing-stop-babysitting-your-ai-assistant/)
+
+---
 
 ---
 
