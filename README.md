@@ -6,11 +6,11 @@
 
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-v1.1-7c3aed?style=for-the-badge&logo=anthropic&logoColor=white)](https://code.claude.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Last Updated](https://img.shields.io/badge/Updated-March%202026-blue?style=for-the-badge)]()
+[![Last Updated](https://img.shields.io/badge/Updated-April%202026-blue?style=for-the-badge)]()
 
 **A comprehensive guide to Claude Code—Anthropic's agentic coding tool.**
 
-[Getting Started](#what-is-claude-code) • [Memory](#claudemd-memory--configuration) • [Context](#context-management) • [Plan Mode](#plan-mode) • [Skills](#skills) • [Sub-Agents](#sub-agents) • [Hooks](#hooks) • [Bonus Features](#bonus-features)
+[Getting Started](#what-is-claude-code) • [Memory](#claudemd-memory--configuration) • [Context](#context-management) • [Plan Mode](#plan-mode) • [Skills](#skills) • [Sub-Agents](#sub-agents) • [Hooks](#hooks) • [Settings](#settings-optimization) • [Bonus Features](#bonus-features)
 
 </div>
 
@@ -27,6 +27,7 @@
 7. [Sub-Agents](#sub-agents)
 8. [Hooks](#hooks)
 9. [Bonus Features](#bonus-features)
+   - [Settings Optimization](#settings-optimization)
    - [Sandboxing](#sandboxing)
    - [Remote Control](#remote-control)
    - [Agent Teams](#agent-teams)
@@ -1086,6 +1087,80 @@ For absolute restrictions (Claude can't even attempt access):
 ---
 
 ## Bonus Features
+
+---
+
+### Settings Optimization
+
+Claude Code's defaults are conservative. These `~/.claude/settings.json` keys are worth adjusting depending on how you work.
+
+#### Terminal Output Limit
+
+When Claude runs a command (tests, builds, linters), it captures the terminal output so it can read the results. The default limit is **30,000 characters** — anything beyond that gets truncated. This means Claude might only see the first half of a failing test suite, miss the actual error at the bottom of a build log, or lose verbose CLI output entirely. It then makes decisions based on incomplete information.
+
+```json
+"terminalOutputLimit": 150000
+```
+
+#### File Read Limit
+
+Claude defaults to reading **25,000 tokens** per file. Most source files are well under that, but generated code, CloudFormation templates, bundled configs, and large data files can exceed it. When they do, Claude silently works with a truncated version of the file — it sees the beginning but not the end, which leads to incorrect edits or missed context.
+
+```json
+"fileTokenLimit": 100000
+```
+
+#### Earlier Context Compaction
+
+Claude automatically compacts (summarizes and compresses) the conversation when it reaches **95%** of the context window. The problem is that output quality can start degrading before that threshold — Claude is already struggling with a bloated context by the time compaction kicks in. Lowering this triggers compaction earlier, keeping the working context cleaner.
+
+```json
+"autoCompactPercentageOverride": 75
+```
+
+#### Disable Git Attribution
+
+By default, Claude adds "Co-Authored-By" lines to commits and PR descriptions. This clutters your contributor graph and commit history. Set both to empty strings to disable it.
+
+```json
+"attribution": {
+  "commit": "",
+  "pr": ""
+}
+```
+
+#### Conversation History Retention
+
+Claude deletes conversation history after **30 days** by default. If you want to revisit past sessions (via `/resume`), extend this. Set to `0` to disable cleanup entirely.
+
+```json
+"cleanupPeriodDays": 365
+```
+
+#### Quick Reference
+
+| Setting                          | Default       | Recommended                    |
+| -------------------------------- | ------------- | ------------------------------ |
+| `terminalOutputLimit`            | 30,000 chars  | `150000`                       |
+| `fileTokenLimit`                 | 25,000 tokens | `100000`                       |
+| `autoCompactPercentageOverride`  | 95%           | `75`                           |
+| `attribution`                    | Enabled       | `{"commit": "", "pr": ""}`     |
+| `cleanupPeriodDays`              | 30 days       | `365` (or `0` to disable)      |
+
+All five together in `~/.claude/settings.json`:
+
+```json
+{
+  "terminalOutputLimit": 150000,
+  "fileTokenLimit": 100000,
+  "autoCompactPercentageOverride": 75,
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "cleanupPeriodDays": 365
+}
+```
 
 ---
 
