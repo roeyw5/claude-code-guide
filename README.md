@@ -698,15 +698,13 @@ Always ask what type of application before generating.
 
 This repo ships with ready-to-use skills in [`.claude/skills/`](.claude/skills/). Clone the repo and they work immediately as `/slash-commands`:
 
-| Command                     | Description                                                  |
-| --------------------------- | ------------------------------------------------------------ |
-| `/commit`                   | Conventional commit messages with proper formatting          |
-| `/doublecheck`              | Cross-check technical claims using a secondary LLM           |
-| `/update`                   | Update a PROGRESS.md file with session changes               |
-| `/weekly-summary`           | Structured meeting summaries in Obsidian-compatible Markdown |
-| `/article-review-full`      | Comprehensive article review (orchestrates tech + editorial) |
-| `/article-review-tech`      | Technical accuracy verification                              |
-| `/article-review-editorial` | Grammar, flow, and SEO review                                |
+| Command          | Description                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------- |
+| `/commit`        | Conventional commit messages with a confirmation step before writing                        |
+| `/drawio`        | Generate native `.drawio` diagrams for VS Code or app.diagrams.net                          |
+| `/html-guide`    | Convert a markdown runbook/guide into a styled, self-contained HTML page (LTR + Hebrew RTL) |
+| `/skill-creator` | Create, edit, and benchmark skills; optimize descriptions for triggering accuracy           |
+| `/update`        | Update a PROGRESS.md file with session changes                                              |
 
 ### Documentation & Guides
 
@@ -908,19 +906,15 @@ Ask what type of documentation is needed before starting.
 - Use agents for simple tasks (overhead not worth it)
 - Expect agents to share state with main conversation
 
-### Included Agents
+### Included Agent
 
-This repo includes 5 specialized agents in [`.claude/agents/`](.claude/agents/) that power the article review system. They demonstrate different model choices and tool restrictions:
+This repo ships with one example agent in [`.claude/agents/`](.claude/agents/) that demonstrates the audit-agent pattern:
 
-| Agent                                  | Model  | Purpose                                          |
-| -------------------------------------- | ------ | ------------------------------------------------ |
-| `article-review-technical-verifier`    | Sonnet | Verify technical claims against official docs    |
-| `article-review-code-examples-checker` | Sonnet | Validate code examples compile and run correctly |
-| `article-review-grammar-editor`        | Haiku  | Fix grammar, spelling, and tone                  |
-| `article-review-flow-reviewer`         | Sonnet | Check logical flow and structure                 |
-| `article-review-seo-optimizer`         | Haiku  | Optimize headings, metadata, and keywords        |
+| Agent         | Model  | Tools                  | Purpose                                                                       |
+| ------------- | ------ | ---------------------- | ----------------------------------------------------------------------------- |
+| `pr-reviewer` | Sonnet | Read, Grep, Glob, Bash | Review uncommitted changes or a diff — surface bugs, security issues, missing tests, breaking changes |
 
-See the [Article Review Team README](examples/article-review-team/README.md) for the full architecture walkthrough.
+It's intentionally **read-only** (no Write/Edit). The point of an independent reviewer is to surface findings, not "just fix it" — a reviewer that can edit is no longer a reviewer. See [pr-reviewer.md](.claude/agents/pr-reviewer.md) for the full prompt; it's a good starting template for your own audit agents.
 
 ### Useful Resources
 

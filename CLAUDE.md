@@ -10,17 +10,17 @@ A shareable collection of Claude Code skills, hooks, and educational examples. E
 
 - `README.md` — Comprehensive guide to Claude Code fundamentals (memory, context, plan mode, skills, sub-agents, hooks)
 - `.claude/skills/` — Reusable skills in `<name>/SKILL.md` format, usable as `/slash-commands`
+- `.claude/agents/` — Example specialized sub-agents (e.g., `pr-reviewer`)
 - `.claude/hooks/` — Security hooks (Node.js) for blocking dangerous commands and protecting secrets
-- `.claude/agents/` — Specialized agents (used by the article-review skills)
-- `examples/` — Documentation and sample output for complex multi-component setups (e.g., article-review-team)
+- `examples/CLAUDE.md` — Sample global CLAUDE.md (the one in `~/.claude/CLAUDE.md`) provided as a starting point readers can copy and adapt
 - `images/` — Diagrams referenced by the README
 
 ## Key Conventions
 
 - Skills follow the `<name>/SKILL.md` directory convention with YAML frontmatter and optional `$ARGUMENTS` support
-- Related skills/agents are grouped with a shared prefix (e.g., `article-review-*`)
+- Related skills are grouped with a shared prefix (e.g., `review-*`, `gen-*`)
 - Hook scripts follow the PreToolUse pattern, log to `~/.claude/hooks-logs/`, and use configurable severity levels
-- All example content uses generic placeholders (NAME1, NAME2, etc.) — no real names or company-specific references
+- All example content uses generic placeholders — no real names or company-specific references
 
 ## Working With This Repo
 

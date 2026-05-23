@@ -8,24 +8,15 @@ Since these live in `.claude/skills/`, they work immediately if you clone this r
 cp -r commit/ /path/to/your-project/.claude/skills/commit/
 ```
 
-## Standalone Skills
+## Available Skills
 
 | Skill | Command | Description |
 |-------|---------|-------------|
-| `commit/` | `/commit` | Conventional commit messages with proper formatting |
-| `doublecheck/` | `/doublecheck` | Cross-check technical claims using a secondary LLM |
-| `update/` | `/update` | Update a PROGRESS.md file with session changes |
-| `weekly-summary/` | `/weekly-summary` | Structured meeting summaries in Obsidian-compatible Markdown |
-
-## Article Review System
-
-These skills work together with 5 specialized agents (in `.claude/agents/article-review-*.md`) to provide comprehensive article reviews. See [examples/article-review-team/README.md](../../examples/article-review-team/README.md) for the full architecture guide.
-
-| Skill | Command | Description |
-|-------|---------|-------------|
-| `article-review-tech/` | `/article-review-tech` | Technical accuracy verification |
-| `article-review-editorial/` | `/article-review-editorial` | Grammar, flow, and SEO review |
-| `article-review-full/` | `/article-review-full` | Orchestrates both tech + editorial in parallel |
+| `commit/` | `/commit` | Conventional commit messages with a confirmation step before writing |
+| `drawio/` | `/drawio` | Generate native `.drawio` XML diagrams for VS Code or app.diagrams.net |
+| `html-guide/` | `/html-guide` | Convert a markdown runbook/guide into a styled, self-contained HTML page (handles LTR and Hebrew RTL) |
+| `skill-creator/` | `/skill-creator` | Create, edit, and benchmark skills; optimize descriptions for triggering accuracy |
+| `update/` | `/update` | Update a `PROGRESS.md` file with session changes |
 
 ## Skill Structure
 
@@ -34,8 +25,12 @@ Each skill follows the Claude Code convention:
 ```
 skill-name/
 ├── SKILL.md              # Required — skill instructions and frontmatter
-└── assets/               # Optional — templates, examples, scripts
+├── scripts/              # Optional — helper scripts the skill calls
+├── references/           # Optional — extra docs loaded only when needed
+└── assets/               # Optional — templates the skill writes into outputs
 ```
+
+More elaborate skills in this repo (`skill-creator/`, `html-guide/`) bundle scripts and templates alongside `SKILL.md` — useful examples of progressive disclosure when the body alone isn't enough.
 
 The `SKILL.md` frontmatter controls behavior:
 

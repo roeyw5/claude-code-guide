@@ -1,5 +1,6 @@
 ---
-description: 'Update PROGRESS.md with recent session changes'
+name: update
+description: Append a session-log entry and refresh the "Next" pointer in a PROGRESS.md file. Use whenever the user wants to log what was done this session, wrap up a working session, record progress, or "update progress" — even if they don't name the file. Skip if PROGRESS.md doesn't exist and the user hasn't asked to create one.
 ---
 
 Update the PROGRESS.md file with changes made during this session.
