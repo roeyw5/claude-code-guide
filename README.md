@@ -4,13 +4,13 @@
 
 ![Claude Code Fundamentals Banner](images/hero-banner.png)
 
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-v1.1-7c3aed?style=for-the-badge&logo=anthropic&logoColor=white)](https://code.claude.com)
+[![Guide Version](https://img.shields.io/badge/Guide-v2.0-7c3aed?style=for-the-badge&logo=anthropic&logoColor=white)](https://code.claude.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Last Updated](https://img.shields.io/badge/Updated-April%202026-blue?style=for-the-badge)]()
+[![Last Updated](https://img.shields.io/badge/Updated-June%202026-blue?style=for-the-badge)]()
 
 **A comprehensive guide to Claude Code—Anthropic's agentic coding tool.**
 
-[Getting Started](#what-is-claude-code) • [Memory](#claudemd-memory--configuration) • [Context](#context-management) • [Plan Mode](#plan-mode) • [Skills](#skills) • [Sub-Agents](#sub-agents) • [Hooks](#hooks) • [Settings](#settings-optimization) • [Bonus Features](#bonus-features)
+[Getting Started](#what-is-claude-code) • [Models](#choosing-the-right-model) • [Memory](#claudemd-memory--configuration) • [Context](#context-management) • [Plan Mode](#plan-mode) • [Goals & Loops](#goals--loops-working-autonomously) • [Skills](#skills) • [Sub-Agents](#sub-agents) • [Workflows](#dynamic-workflows) • [Hooks](#hooks) • [Going Deeper](#going-deeper) • [Bonus Features](#bonus-features)
 
 </div>
 
@@ -19,18 +19,24 @@
 ## Table of Contents
 
 1. [What is Claude Code?](#what-is-claude-code)
-2. [CLAUDE.md: Memory & Configuration](#claudemd-memory--configuration)
-3. [Context Management](#context-management)
-4. [Plan Mode](#plan-mode)
-5. [Extending Claude Code](#extending-claude-code)
-6. [Skills](#skills)
-7. [Sub-Agents](#sub-agents)
-8. [Hooks](#hooks)
-9. [Bonus Features](#bonus-features)
-   - [Settings Optimization](#settings-optimization)
-   - [Sandboxing](#sandboxing)
-   - [Remote Control](#remote-control)
-   - [Agent Teams](#agent-teams)
+2. [Choosing the Right Model](#choosing-the-right-model)
+3. [CLAUDE.md: Memory & Configuration](#claudemd-memory--configuration)
+4. [Context Management](#context-management)
+5. [Plan Mode](#plan-mode)
+6. [Goals & Loops: Working Autonomously](#goals--loops-working-autonomously)
+7. [Extending Claude Code](#extending-claude-code)
+8. [Skills](#skills)
+9. [Sub-Agents](#sub-agents)
+10. [Dynamic Workflows](#dynamic-workflows)
+11. [Hooks](#hooks)
+12. [Going Deeper](#going-deeper)
+    - [MCP: Model Context Protocol](#mcp-model-context-protocol)
+    - [API Key vs Subscription](#api-key-vs-subscription)
+13. [Bonus Features](#bonus-features)
+    - [Settings Optimization](#settings-optimization)
+    - [Sandboxing](#sandboxing)
+    - [Remote Control](#remote-control)
+    - [Agent Teams](#agent-teams)
 
 ---
 
@@ -111,15 +117,20 @@ Use `/permissions` during a session to manage your allowlist interactively.
 
 ### Essential Commands
 
-| Command              | Purpose                                     |
-| -------------------- | ------------------------------------------- |
-| `/help`              | Show all available commands                 |
-| `/clear`             | Reset conversation (keeps CLAUDE.md loaded) |
-| `/compact`           | Compress conversation to save context       |
-| `/context`           | Visualize context window usage              |
-| `/model`             | Switch between models                       |
-| `/account` & `usage` | Show usage details for weekly limits        |
-| `/doctor`            | Diagnose installation issues                |
+| Command              | Purpose                                                          |
+| -------------------- | ---------------------------------------------------------------- |
+| `/help`              | Show all available commands                                      |
+| `/clear`             | Reset conversation (keeps CLAUDE.md loaded)                      |
+| `/compact`           | Compress conversation to save context                            |
+| `/context`           | Visualize context window usage                                   |
+| `/model`             | Switch between models ([see Choosing the Right Model](#choosing-the-right-model)) |
+| `/effort` & `/fast`  | Tune reasoning depth and output speed ([see Choosing the Right Model](#choosing-the-right-model)) |
+| `/goal`              | Keep working until a condition is met ([see Goals & Loops](#goals--loops-working-autonomously)) |
+| `/loop`              | Re-run a prompt on an interval ([see Goals & Loops](#goals--loops-working-autonomously)) |
+| `/workflows`         | Monitor running dynamic workflows ([see Dynamic Workflows](#dynamic-workflows)) |
+| `/cd`                | Change working directory mid-session (without breaking the prompt cache) |
+| `/account` & `/usage` | Show usage details for weekly limits                            |
+| `/doctor`            | Diagnose installation issues                                     |
 
 ### Documentation & Guides
 
@@ -127,6 +138,124 @@ Use `/permissions` during a session to manage your allowlist interactively.
 - [Claude Code Best Practices](https://www.anthropic.com/engineering/claude-code-best-practices) - Tips and proven workflows from Anthropic's engineering team
 - [Claude Code in Action](https://anthropic.skilljar.com/claude-code-in-action) - Interactive course with hands-on examples and use cases
 - [Claude Code Sandboxing](https://www.develeap.com/claude-code-sandboxing-stop-babysitting-your-ai-assistant/) - Article and tutorial for running in a safe way
+
+---
+
+## Choosing the Right Model
+
+Model choice is one of the highest-leverage decisions you make in Claude Code—it controls speed, cost, output quality, and how much autonomy you can safely hand over. Most people either always use the biggest model (burning through limits) or always use the default (leaving capability on the table). A little intentionality goes a long way.
+
+### The Current Lineup
+
+| Model        | Alias    | API Price (in/out per million tokens) | Context    | Character                                                        |
+| ------------ | -------- | --------------------------- | -------------------- | ---------------------------------------------------------------- |
+| **Fable 5**  | `fable`  | $10 / $50                   | 1M                   | Most capable. Long autonomous runs, ambiguous "figure it out" work |
+| **Opus 4.8** | `opus`   | $5 / $25                    | 200K (1M via `opus[1m]`; automatic on Max/Team/Enterprise) | Deep reasoning, long-horizon agentic coding |
+| **Sonnet 4.6** | `sonnet` | $3 / $15                  | 200K (1M via `sonnet[1m]`) | Best speed/intelligence balance—the daily driver           |
+| **Haiku 4.5** | `haiku` | $1 / $5                     | 200K                 | Fastest and cheapest. Scoped tasks, sub-agent workers             |
+
+> 📝 On a subscription you don't pay these per-token prices directly—they matter when using an API key or usage credits. See [API Key vs Subscription](#api-key-vs-subscription).
+
+### The Decision Guide
+
+| Task                                                  | Reach For                                  |
+| ----------------------------------------------------- | ------------------------------------------ |
+| Daily coding: features, bug fixes, moderate refactors | **Sonnet 4.6**                             |
+| Architecture decisions, root-cause debugging, complex refactors | **Opus 4.8**                     |
+| Ambiguous multi-day work where you'd normally break it up for a human | **Fable 5**                |
+| Quick edits, lint fixes, simple transformations       | **Haiku 4.5**                              |
+| Heavy planning, routine execution                     | **`opusplan`** (hybrid—see below)          |
+| [Sub-agent](#sub-agents) fan-out workers              | **Haiku** workers, big-model orchestrator  |
+
+**Two mental shortcuts:**
+
+1. **Match the model to the ambiguity, not the size.** A 500-line mechanical rename is a Haiku/Sonnet job. A 10-line fix that requires understanding *why* the system behaves this way is an Opus/Fable job.
+2. **Pay for the plan, not the typing.** Most of the value of a big model is in the decisions, not the code generation. That's exactly what `opusplan` exploits.
+
+#### Fable 5, Mythos 5, and the "Mythos-class" Tier
+
+Fable 5 and Mythos 5 (both released June 9, 2026) are **the same underlying model**—a fact the naming obscures. "Mythos-class" is the capability tier above Opus; the two names are two release channels of it:
+
+| | Fable 5 | Mythos 5 |
+| --- | --- | --- |
+| **Who gets it** | Everyone (API, Claude Code, Bedrock, Vertex) | Approved orgs via **Project Glasswing** (cybersecurity & critical-infrastructure partners) |
+| **Safeguards** | Safety classifiers for high-risk domains (offensive cyber, biology, model distillation) | Classifiers removed for authorized use |
+| **Specs & pricing** | 1M context, $10/$50 per million tokens | Identical |
+
+The classifiers behave differently than you might expect: when one triggers—on average in **under 5% of sessions**—Fable 5 doesn't refuse. The request transparently **falls back to Opus 4.8** and you see a notice. For everyday coding work you'll likely never hit one.
+
+So for practical purposes: **Fable 5 is the Mythos-class model you can choose in Claude Code** (`/model fable`); Mythos 5 isn't something you'll ever see in the picker.
+
+**Where Fable 5 actually earns its price:** its lead over Opus 4.8 grows with task difficulty—80.3% vs ~69% on SWE-Bench Pro, and roughly double Opus 4.8's scores on frontier-coding benchmarks. On simple, scoped work the gap is small, which is exactly why the decision guide above doesn't default to it.
+
+> ⚠️ **Pricing window:** Fable 5 is included on Pro/Max/Team/Enterprise plans at no extra cost only through **June 22, 2026**. From June 23 it moves to usage credits (pay-as-you-go credits, separate from your plan limits) at $10/$50 per million tokens—budget accordingly before pointing long autonomous runs at it.
+
+### Switching Models
+
+```bash
+/model            # interactive picker (Enter = save as default, s = this session only)
+/model sonnet     # switch by alias
+claude --model opus   # set at launch
+```
+
+Useful aliases beyond the basics:
+
+| Alias        | Behavior                                                              |
+| ------------ | --------------------------------------------------------------------- |
+| `default`    | Clears your override—reverts to your plan's recommended model         |
+| `best`       | Fable 5 if your account has access, otherwise latest Opus             |
+| `opus[1m]` / `sonnet[1m]` | Extended 1M-token context window variants                |
+| `opusplan`   | **Hybrid:** Opus while in [Plan Mode](#plan-mode), auto-switches to Sonnet for execution |
+
+> 💡 **`opusplan` is the best default for most serious work.** You get Opus-quality architectural thinking during planning, then Sonnet-priced execution. The plan is where model quality matters most.
+
+### Effort Levels
+
+Newer models support an **effort** parameter that controls how deeply they reason—independent of which model you picked:
+
+```bash
+/effort low|medium|high|xhigh|max    # session-level
+/effort auto                          # reset to default
+```
+
+| Level    | Use For                                                       |
+| -------- | ------------------------------------------------------------- |
+| `low`    | Latency-sensitive, simple tasks                                |
+| `medium` | Cost-sensitive work—trades some depth for fewer tokens         |
+| `high`   | The default—balanced                                           |
+| `xhigh`  | Deeper reasoning at higher token spend                         |
+| `max`    | No token constraint; session-only. Can overthink simple tasks  |
+
+Haiku doesn't support effort levels. Skills and sub-agents can pin their own level with `effort:` in frontmatter.
+
+> 📝 You'll also see `/effort ultracode`—not a reasoning level but a session mode that combines `xhigh` reasoning with automatic multi-agent orchestration. See [Dynamic Workflows](#dynamic-workflows).
+
+### Fast Mode (`/fast`)
+
+Fast mode is **not a smaller model**—it's the same Opus served with ~2.5x faster output, at roughly 2x the price ($10/$50 per million tokens on Opus 4.8—coincidentally the same price point as Fable 5, so at that rate, decide whether you want speed or capability). Toggle it with `/fast`.
+
+| ✅ Use Fast Mode For                  | ❌ Skip It For                          |
+| ------------------------------------- | --------------------------------------- |
+| Live debugging, rapid iteration       | Long autonomous runs (cost compounds)   |
+| Interactive pair-coding sessions      | Batch/background work                   |
+| Time-critical fixes                   | Cost-sensitive work                     |
+
+> ⚠️ Fast mode draws from **usage credits**, not your plan limits, and enabling it mid-conversation re-caches your history at fast-mode rates—turn it on at session start if you plan to use it.
+
+### Models for Sub-Agents
+
+Each [sub-agent](#sub-agents) can declare its own model in frontmatter (`model: haiku | sonnet | opus | inherit`). The classic cost pattern: **orchestrator on a big model, workers on Haiku.** A review fan-out with five Haiku workers costs a fraction of the same fan-out on Opus, and for scoped tasks ("check this file for X") the quality difference is usually negligible.
+
+### Plan Limits and Model Choice
+
+On Pro/Max plans, usage limits are shared between claude.ai chat and Claude Code, and bigger models consume them faster. Max plans have separate weekly caps for all-models vs Sonnet-only—meaning Sonnet work keeps flowing even after you exhaust the Opus budget. Check `/usage` before a long Opus/Fable session.
+
+### Documentation & Guides
+
+- [Model Configuration](https://code.claude.com/docs/en/model-config) - Aliases, effort levels, and environment overrides
+- [Models Overview](https://platform.claude.com/docs/en/about-claude/models/overview) - Full comparison and pricing
+- [Introducing Claude Fable 5 and Claude Mythos 5](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5) - Launch details, classifier behavior, and API changes
+- [Fast Mode](https://code.claude.com/docs/en/fast-mode) - Setup and availability details
 
 ---
 
@@ -326,7 +455,7 @@ Long conversations accumulate assumptions that become problems:
 
 > 💡 **/clear keeps your rules.** It wipes chat history but does NOT forget what's in CLAUDE.md. Your project configuration stays intact—only the conversation resets.
 
-> ⚠️ **Auto-compaction:** Claude Code automatically compacts at ~75% context usage. This can interrupt your flow—use `/clear` proactively between tasks to avoid it.
+> ⚠️ **Auto-compaction:** Claude Code compacts automatically as you approach the context limit (95% by default—see [Settings Optimization](#settings-optimization) to trigger it earlier). This can interrupt your flow—use `/clear` proactively between tasks to avoid it.
 
 ### /compact vs /clear
 
@@ -414,7 +543,7 @@ In Plan Mode, Claude has access to **read-only tools only**:
 | Directory listings (LS)    | Bash commands             |
 | Grep/Glob searches         | File creation             |
 | Web search/fetch           | Any state-modifying tools |
-| Task (research sub-agents) | MCP tools that modify     |
+| Task (research sub-agents) | [MCP](#mcp-model-context-protocol) tools that modify |
 
 Claude researches, analyzes, and creates a plan—then waits for your approval before touching anything.
 
@@ -490,9 +619,108 @@ When satisfied, exit Plan Mode (`Shift+Tab`) and Claude will ask for confirmatio
 
 ---
 
+## Goals & Loops: Working Autonomously
+
+Plan Mode is about supervising Claude *before* work starts. These commands go the other direction: letting Claude keep working **without you prompting every turn**. Used well, they turn "babysitting an agent" into "checking in on a colleague."
+
+### /goal — Work Until a Condition Is Met
+
+`/goal` sets a completion condition, and Claude keeps taking turns until it's met. After each turn, a separate **evaluator** (a small, fast model—Haiku by default) checks whether the condition holds. If not, Claude automatically continues instead of returning control to you.
+
+```
+/goal all tests in test/auth pass and the lint step is clean
+```
+
+| Command             | Effect                                                            |
+| ------------------- | ----------------------------------------------------------------- |
+| `/goal <condition>` | Set the goal and start working toward it                          |
+| `/goal`             | Show status: elapsed time, turn count, token spend, evaluator's last reason |
+| `/goal clear`       | Stop early (also accepts `stop`, `off`, `cancel`)                 |
+
+**The key constraint:** the evaluator only sees the conversation transcript—it can't run tools. So your condition must be something Claude's own output can *demonstrate*: test results, build exit codes, file counts, an empty issue queue. "Tests pass" works (the test output lands in the transcript). "The feature feels polished" doesn't.
+
+#### Writing Good Conditions
+
+1. **One measurable end state** — `npm test exits 0`, `git status is clean`
+2. **A stated check** — tell Claude how to prove it
+3. **Constraints that matter** — "no other test file is modified"
+4. **Bound the run** — "...or stop after 20 turns"
+
+```
+/goal every TODO in src/api is resolved, npm test exits 0,
+      no files outside src/api are modified, or stop after 15 turns
+```
+
+#### /goal + Auto Mode = Unattended Runs
+
+These compose: auto mode (the permission setting that auto-approves tool calls—cycle with `Shift+Tab`) approves **tools within a turn**, `/goal` approves **continuing to the next turn**. Together they let Claude run a long task end-to-end. For headless automation: `claude -p "/goal CHANGELOG.md has an entry for every PR merged this week"`.
+
+> 📝 Goals survive `/resume` and work with `/compact`, but `/clear` removes them. Requires Claude Code v2.1.139+.
+
+### /loop — Re-run on a Schedule
+
+`/loop` repeats a prompt on a timer. Three modes:
+
+| Usage                              | Behavior                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------ |
+| `/loop 10m check CI, fix failures` | Fixed interval (units: `s`, `m`, `h`, `d`)                                |
+| `/loop check the deploy status`    | Claude picks and adjusts the interval itself (1 minute–1 hour)            |
+| `/loop`                            | Built-in maintenance mode: tend the PR, fix CI, clean up                  |
+
+- **Stop a loop:** press `Esc` while it's waiting for the next iteration.
+- **Loops are session-scoped** and survive `/resume`, but recurring loops **auto-expire after 7 days**—a safety net so a forgotten loop can't drain your quota forever.
+- **Customize bare `/loop`:** create `.claude/loop.md` (project) or `~/.claude/loop.md` (personal) with your own maintenance instructions.
+
+> ⚠️ **Token cost is the catch.** Every iteration re-sends the conversation context. A loop polling every 5 minutes for hours adds up quietly. `/clear` before starting a long loop, and prefer the dynamic mode (no interval)—Claude spaces out checks based on what it observes instead of polling blindly.
+
+| ✅ Good Loop Tasks                       | ❌ Bad Loop Tasks                                  |
+| ---------------------------------------- | -------------------------------------------------- |
+| Polling a deployment or CI run            | Unattended multi-day automation (use Routines)      |
+| PR babysitting—address reviews, rebase    | Write-heavy work with nobody watching               |
+| "Remind me at 3pm to push the release"    | Anything that should survive a machine restart      |
+
+### Which One Do I Want?
+
+| Mechanism | Driven By              | Best For                                      |
+| --------- | ---------------------- | ---------------------------------------------- |
+| `/goal`   | A completion condition | A finite task with a verifiable end state      |
+| `/loop`   | A time interval        | Polling and recurring upkeep                   |
+| **[Hook](#hooks)** | An event      | Deterministic enforcement, every time          |
+
+### Beyond Your Machine: Scheduled Routines
+
+`/loop` dies with your session. **Routines** run in Anthropic's cloud on a schedule—your machine can be off entirely:
+
+```
+/schedule daily PR review at 9am
+/schedule list
+```
+
+Each run is a fresh cloud session:
+
+- Your repo is **cloned fresh** and the prompt executes autonomously—no permission prompts
+- Pushes go to `claude/*`-prefixed branches by default (a safety boundary)
+- Triggers: cron schedules (minimum 1 hour), API calls, or GitHub events (PR opened, release published)
+- Available on Pro/Max/Team/Enterprise as a research preview
+
+| Dimension          | `/loop`            | Routines              |
+| ------------------ | ------------------ | --------------------- |
+| Runs on            | Your machine       | Anthropic's cloud     |
+| Machine must be on | Yes                | No                    |
+| Minimum interval   | 1 minute           | 1 hour                |
+| Local file access  | Yes                | No (fresh clone)      |
+
+### Documentation & Guides
+
+- [Keep Claude Working Toward a Goal](https://code.claude.com/docs/en/goal) - Official /goal documentation
+- [Scheduled Tasks](https://code.claude.com/docs/en/scheduled-tasks) - /loop, cron syntax, and expiry rules
+- [Routines](https://code.claude.com/docs/en/routines) - Cloud-scheduled agents
+
+---
+
 ## Extending Claude Code
 
-Claude Code can be extended beyond CLAUDE.md with three mechanisms. This section summarizes when to use each—the following sections cover details.
+Claude Code can be extended beyond CLAUDE.md with four mechanisms. This section summarizes when to use each—the following sections cover details.
 
 <div align="center">
 
@@ -500,13 +728,16 @@ Claude Code can be extended beyond CLAUDE.md with three mechanisms. This section
 
 </div>
 
-### The Three Mechanisms
+### The Four Mechanisms
 
-| Mechanism     | Type          | Runs When                                     | Best For                |
-| ------------- | ------------- | --------------------------------------------- | ----------------------- |
-| **Skill**     | AI-driven     | You invoke (`/skill`) or Claude auto-triggers | Reusable workflows      |
-| **Sub-Agent** | AI-driven     | Claude delegates, or you invoke               | Parallel/isolated work  |
-| **Hook**      | Deterministic | Always, on specific events                    | Enforcement, validation |
+| Mechanism            | Type          | Runs When                                          | Best For                            |
+| -------------------- | ------------- | --------------------------------------------------- | ----------------------------------- |
+| **Skill**            | AI-driven     | You invoke (`/skill`) or Claude auto-triggers       | Reusable workflows                  |
+| **Sub-Agent**        | AI-driven     | Claude delegates, or you invoke                     | Parallel/isolated work              |
+| **Dynamic Workflow** | Scripted      | You opt in (`ultracode` keyword or saved workflow)  | Large-scale multi-agent orchestration |
+| **Hook**             | Deterministic | Always, on specific events                          | Enforcement, validation             |
+
+> 📝 The diagram above shows the original three; **Dynamic Workflows** (mid-2026) is the newest addition—covered in its own section below.
 
 ### Quick Decision Guide
 
@@ -516,6 +747,7 @@ Claude Code can be extended beyond CLAUDE.md with three mechanisms. This section
 | Auto-apply expertise based on context        | **Skill** (auto-trigger) |
 | Do heavy analysis without cluttering my chat | **Sub-Agent**            |
 | Work on multiple things in parallel          | **Sub-Agent**            |
+| Audit/migrate/review at a scale one agent can't hold | **Dynamic Workflow** |
 | ALWAYS run a check, no exceptions            | **Hook**                 |
 | Block dangerous operations deterministically | **Hook**                 |
 
@@ -526,6 +758,8 @@ Claude Code can be extended beyond CLAUDE.md with three mechanisms. This section
 | **Control**        | AI decides how/when              | You define exactly when  |
 | **Flexibility**    | Adapts to context                | Same behavior every time |
 | **Can be skipped** | Yes, if Claude deems unnecessary | No, always runs          |
+
+> 📝 Dynamic Workflows sit between the two camps: AI plans the structure, but once you approve the script it executes deterministically—agents run as written, not as re-decided.
 
 ---
 
@@ -602,6 +836,7 @@ When reviewing code:
 | `description`              | When to auto-trigger                                     | `Review code for quality...` |
 | `allowed-tools`            | Restrict available tools                                 | `Read, Grep, Glob`           |
 | `model`                    | Use specific model                                       | `sonnet`, `opus`, `haiku`    |
+| `effort`                   | Pin reasoning effort for this skill                      | `low`, `medium`, `high`, `xhigh` |
 | `argument-hint`            | Shown in autocomplete after `/name`                      | `[file-path]`                |
 | `disable-model-invocation` | User-only — no auto-trigger                              | `true`                       |
 | `user-invocable`           | Set `false` to hide from `/` menu (background knowledge) | `false`                      |
@@ -651,6 +886,7 @@ Claude Code ships with built-in skills available in every session:
 | `/simplify`            | Reviews recently changed files for code reuse, quality, and efficiency. Spawns 3 parallel review agents, aggregates findings, applies fixes. Pass text to focus: `/simplify focus on memory efficiency` |
 | `/batch <instruction>` | Orchestrates large-scale changes across a codebase. Decomposes work into 5–30 independent units, spawns one agent per unit in isolated git worktrees                                                    |
 | `/claude-api`          | Loads Claude API reference for your project's language. Also auto-activates when your code imports Anthropic SDKs                                                                                       |
+| `/deep-research <question>` | Bundled dynamic workflow: fans out web searches, fetches and cross-checks sources, returns a cited report (see [Dynamic Workflows](#dynamic-workflows))                                            |
 
 ### Skill Example: Dockerfile Generator
 
@@ -780,12 +1016,14 @@ You are a security-focused reviewer. Check for:
 
 #### Configuration Options
 
-| Option  | Purpose              | Values                                        |
-| ------- | -------------------- | --------------------------------------------- |
-| `model` | Which Claude model   | `opus`, `sonnet`, `haiku`                     |
-| `tools` | Available tools      | `Read`, `Write`, `Bash`, `Grep`, `Glob`, etc. |
-| `color` | UI identifier        | `blue`, `orange`, `red`, `green`, `purple`    |
-| `hooks` | Agent-specific hooks | Hook configuration (see Hooks section)        |
+| Option  | Purpose              | Values                                          |
+| ------- | -------------------- | ----------------------------------------------- |
+| `model` | Which Claude model   | `opus`, `sonnet`, `haiku`, `inherit` (parent's) |
+| `tools` | Available tools      | `Read`, `Write`, `Bash`, `Grep`, `Glob`, etc.   |
+| `color` | UI identifier        | `blue`, `orange`, `red`, `green`, `purple`      |
+| `hooks` | Agent-specific hooks | Hook configuration (see Hooks section)          |
+
+> 💡 **Cost pattern:** put review/worker agents on `haiku` and keep the big model for the main session. For scoped tasks the quality difference is small; the cost difference isn't. See [Models for Sub-Agents](#models-for-sub-agents).
 
 #### Tool Restrictions
 
@@ -807,6 +1045,8 @@ Sub-agents can run in the background:
 4. Agent reports back when done
 
 This is great for long-running analysis while you continue coding.
+
+> 📝 **Nested sub-agents:** as of mid-2026, sub-agents can spawn their own sub-agents (up to 5 levels deep)—enabling hierarchical delegation, like an orchestrator that spawns researchers that spawn specialists.
 
 ### Sub-Agent Example: Documentation Generator
 
@@ -921,6 +1161,113 @@ It's intentionally **read-only** (no Write/Edit). The point of an independent re
 - [Sub-Agents Documentation](https://docs.anthropic.com/en/docs/claude-code/sub-agents) - Complete guide to creating specialized agents
 - [How to create and use Subagents in Claude Code](https://www.cometapi.com/how-to-create-and-use-subagents-in-claude-code/) - A practical guide
 - [YouTube Video](https://www.youtube.com/watch?v=mEt-i8FunG8) - Sub-Agents overview in 10 Minutes
+
+---
+
+## Dynamic Workflows
+
+Dynamic Workflows (mid-2026) are the newest orchestration layer. You describe a task, Claude writes a **JavaScript orchestration script**, and a separate runtime executes it in the background—spawning dozens to hundreds of sub-agents deterministically while your session stays responsive.
+
+**The mental shift:** with sub-agents, Claude decides what to spawn turn by turn, and every intermediate result flows back through its context. With workflows, *the plan moves out of Claude's head and into a script*—loops, fan-outs, and verification passes are encoded as code, and intermediate results live in script variables instead of the context window.
+
+### When a Workflow Beats a Sub-Agent
+
+| Situation                                                   | Why a Workflow                                        |
+| ----------------------------------------------------------- | ----------------------------------------------------- |
+| Audit every API endpoint / migrate every call site          | Work-list too large for one context window            |
+| "Find bugs and *verify* each one before reporting"          | Adversarial verification needs structured fan-out     |
+| Repeatable multi-stage process you'll run again             | Save the script, re-run as a `/command`               |
+| Research that needs multiple independent search angles      | Parallel sweeps with a synthesis stage                |
+
+For a quick isolated task—"review this file," "summarize these logs"—a plain sub-agent is still the right tool. Workflows shine when the *structure* of the work (fan out, verify, synthesize, loop until done) matters.
+
+> 📝 Already using `/batch`? That bundled skill is a fixed decompose-and-edit recipe. Dynamic Workflows generalize the idea: arbitrary structure, verification stages, and scripts you can save and re-run.
+
+### Triggering a Workflow
+
+Workflows are **opt-in by design**—they can spawn many agents and burn serious tokens, so Claude won't launch one unless you ask:
+
+| Method               | How                                                                       |
+| -------------------- | ------------------------------------------------------------------------- |
+| **One-off**          | Include the keyword `ultracode` in your prompt                            |
+| **Session-wide**     | `/effort ultracode` — every substantive task gets workflow treatment      |
+| **In your own words**| "use a workflow", "fan out agents", "orchestrate this with sub-agents"    |
+| **Saved workflow**   | `/<workflow-name>` from `.claude/workflows/` or `~/.claude/workflows/`    |
+| **Bundled**          | `/deep-research <question>`                                               |
+
+```
+ultracode: audit every endpoint under src/routes/ for missing auth checks
+```
+
+> 💡 Typed `ultracode` by accident? Press `Option+W` / `Alt+W` to dismiss it.
+
+### Anatomy of a Workflow Script
+
+You rarely write these by hand—Claude generates them—but reading one demystifies the feature:
+
+```javascript
+export const meta = {
+  name: 'audit-auth',
+  description: 'Audit API routes for missing auth checks',
+  phases: [{ title: 'Find' }, { title: 'Verify' }],
+}
+
+phase('Find')
+const findings = await parallel(routes.map(r => () =>
+  agent(`Check ${r} for missing auth checks`, { phase: 'Find' })))
+
+phase('Verify')
+// every finding gets an independent skeptic before it reaches the report
+const confirmed = await parallel(findings.filter(Boolean).map(f => () =>
+  agent(`Try to refute this finding: ${f}`, { phase: 'Verify' })))
+
+return confirmed
+```
+
+| Primitive    | What It Does                                                        |
+| ------------ | -------------------------------------------------------------------- |
+| `agent()`    | Spawn one sub-agent; can return validated JSON via a schema          |
+| `parallel()` | Run tasks concurrently, wait for all (a barrier)                     |
+| `pipeline()` | Stream items through stages with no barrier—fastest for multi-stage  |
+| `phase()` / `log()` | Group progress / narrate status in the UI                      |
+| `args` / `budget` | Input parameters / token-budget tracking                        |
+
+The killer pattern this enables is **adversarial verification**: one wave of agents finds issues, a second wave of independent skeptics tries to refute each finding, and only survivors reach you. That's how workflow-driven reviews avoid plausible-but-wrong findings.
+
+### Monitoring and Reusing
+
+- **`/workflows`** shows live progress: phases, per-agent token usage, elapsed time. From there you can pause (`p`), stop (`x`), or **save the run's script (`s`)**.
+- Saved scripts land in `.claude/workflows/` (project, shared via git) or `~/.claude/workflows/` (personal) and become `/commands`.
+- Interrupted runs are **resumable in the same session**—completed agents return cached results; only the rest re-run.
+
+### Guardrails & Cost
+
+| Guardrail                  | Detail                                                          |
+| -------------------------- | ---------------------------------------------------------------- |
+| Concurrency cap            | ~16 agents at once (queued beyond that)                          |
+| Per-run cap                | 1,000 agents total—a runaway-loop backstop                       |
+| Approval prompt            | Every run shows planned phases before starting                   |
+| Worktree isolation         | `isolation: 'worktree'` gives agents separate git worktrees when they edit the same files in parallel |
+| Kill switch                | `"disableWorkflows": true` in settings, or `CLAUDE_CODE_DISABLE_WORKFLOWS=1` |
+
+> ⚠️ **Workflows are token-hungry by nature.** A single run can use more tokens than a full day of normal sessions. Start with a narrow slice (one directory, one question) to gauge spend before pointing a workflow at the whole repo. `/workflows` shows you the bill as it accumulates.
+
+> 📝 **Proof of scale:** the Bun runtime's Zig→Rust migration—roughly 750,000 lines in 11 days—was driven by dynamic workflows running hundreds of parallel agents in isolated worktrees.
+
+### Workflows vs Sub-Agents vs Agent Teams
+
+| Aspect              | Sub-Agents             | [Agent Teams](#agent-teams) (experimental) | Dynamic Workflows |
+| ------------------- | ---------------------- | ---------------------------- | -------------------------------- |
+| **Who plans**       | Claude, turn by turn   | Team lead, turn by turn      | The script itself                |
+| **Results live in** | Claude's context       | Shared task list + messages  | Script variables                 |
+| **Scale**           | A few per turn         | A handful of peers           | Dozens to hundreds per run       |
+| **Best for**        | Isolated focused tasks | Collaboration & discussion   | Structured fan-out + verification |
+
+### Documentation & Guides
+
+- [Dynamic Workflows Documentation](https://code.claude.com/docs/en/workflows) - Primitives, saving, permissions
+- [Introducing Dynamic Workflows](https://claude.com/blog/introducing-dynamic-workflows-in-claude-code) - Official announcement
+- [A Harness for Every Task](https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code) - Workflow patterns from Anthropic
 
 ---
 
@@ -1080,7 +1427,83 @@ For absolute restrictions (Claude can't even attempt access):
 
 ---
 
+## Going Deeper
+
+Two topics that reach beyond day-to-day Claude Code usage—each a world of its own. Here's just enough context to know whether you need them, and where to learn them properly.
+
+---
+
+### MCP: Model Context Protocol
+
+Everything in this guide so far extends what Claude *knows* (CLAUDE.md, skills) and *when it acts* (hooks, sub-agents). **MCP extends what Claude can touch.**
+
+MCP is an open standard—created by Anthropic, adopted across the industry—for connecting AI tools to external systems: databases, browsers, ticketing systems, internal APIs. Instead of building a custom integration for every tool, an **MCP server** exposes capabilities (tools, resources, prompts) that any **MCP client**—Claude Code, Claude Desktop, and most other AI tools—can use through one protocol.
+
+In practice, in Claude Code:
+
+```bash
+claude mcp add   # connect a server
+```
+
+...and suddenly Claude can query your Postgres database, drive a real browser through Playwright, read your Jira board, or call your internal APIs—as tools, mid-conversation.
+
+Two cautions before you connect everything in sight:
+
+| ⚠️ Watch Out For       | Why                                                                                           |
+| ---------------------- | ---------------------------------------------------------------------------------------------- |
+| **Context cost**       | Every server adds tool definitions. Claude Code defers large servers' tools and loads them on demand, but connect what you actually use |
+| **Trust**              | An MCP server runs with *your* credentials. Treat third-party servers like dependencies—review before installing |
+
+**The best way to learn MCP properly**, in my opinion, is Anthropic's official course pair—hands-on, free, and goes from zero to building your own servers:
+
+1. **[Introduction to Model Context Protocol](https://anthropic.skilljar.com/introduction-to-model-context-protocol)** — Build your first MCP server: project setup, tool definitions, the server inspector, then connecting clients with resources and prompts. Prerequisites: working Python, basic JSON/HTTP.
+2. **[Model Context Protocol: Advanced Topics](https://anthropic.skilljar.com/model-context-protocol-advanced-topics)** — The production layer: sampling, notifications, roots, transports (STDIO vs StreamableHTTP), scaling and deployment.
+
+Take them in order—the second assumes you've built what the first teaches.
+
+#### Useful Resources
+
+- [MCP in Claude Code](https://code.claude.com/docs/en/mcp) - Connecting and managing servers
+- [modelcontextprotocol.io](https://modelcontextprotocol.io) - The protocol specification and ecosystem
+
+---
+
+### API Key vs Subscription
+
+There are two ways to pay for Claude Code, and the difference matters more than most people realize:
+
+| | **Subscription** (`/login`) | **API Key** (Claude Console) |
+| --- | --- | --- |
+| **How you pay** | Fixed monthly (Pro $20, Max $100–200) | Per token, pay-as-you-go |
+| **Limits** | 5-hour sessions + weekly caps | None—your bill is the limit |
+| **Cost profile** | Predictable; heavy daily use is far cheaper | Bursty/occasional use can be cheaper; heavy use gets expensive fast |
+| **Remote Control, Routines, web sessions** | ✅ | ❌ Not supported |
+| **Setup** | `claude` → `/login` | `export ANTHROPIC_API_KEY=...` |
+
+**Rule of thumb:** if a *human* is driving Claude Code daily, use a subscription (Max if you're heavy). An API key makes sense when *machines* drive Claude—CI pipelines, scheduled jobs, multi-tenant systems, or programmatic use through the Agent SDK—or when your usage is too occasional to justify a monthly fee.
+
+#### Gotchas Worth Knowing (June 2026)
+
+- **If both exist, the API key wins.** An `ANTHROPIC_API_KEY` env var takes precedence over your subscription login—you can silently burn per-token dollars while paying for Max. Run `/status` to see which is active; `unset ANTHROPIC_API_KEY` to fall back.
+- **CI without an API key:** on a subscription, `claude setup-token` generates a long-lived token (1 year) for pipelines and headless `claude -p`—no Console account needed.
+- **Non-interactive usage is splitting off:** starting June 15, 2026, subscription plans separate interactive sessions from non-interactive usage (Agent SDK, `claude -p`, GitHub Actions), which draws from a separate monthly Agent SDK credit pool—this includes `setup-token` CI pipelines.
+
+#### Learning to Build with the API
+
+If you're heading down the programmatic path—building agents, automations, or products on top of Claude rather than just using Claude Code interactively—the official free course covers the foundation properly:
+
+**[Building with the Claude API](https://anthropic.skilljar.com/claude-with-the-anthropic-api)** — API access and auth, multi-turn conversations, prompt engineering and evaluation, tool use, RAG and agentic search, prompt caching, and agent architectures. It's the layer Claude Code itself is built on—understanding it makes you better at both.
+
+#### Useful Resources
+
+- [Authentication](https://code.claude.com/docs/en/authentication) - All auth methods and precedence rules
+- [Manage Costs](https://code.claude.com/docs/en/costs) - Tracking and controlling spend
+
+---
+
 ## Bonus Features
+
+Smaller features worth knowing about—each one optional, each one useful in the right situation.
 
 ---
 
@@ -1162,8 +1585,6 @@ All five together in `~/.claude/settings.json`:
 
 For a deep dive on sandboxing Claude Code to run with minimal supervision, see:
 [Claude Code Sandboxing: Stop Babysitting Your AI Assistant](https://www.develeap.com/claude-code-sandboxing-stop-babysitting-your-ai-assistant/)
-
----
 
 ---
 
@@ -1266,7 +1687,7 @@ Agent Teams let you coordinate multiple Claude Code instances working together i
 | **Best for**      | Focused tasks where only the result matters | Complex work requiring discussion and collaboration |
 | **Token cost**    | Lower — results summarized back             | Higher — each teammate is a full Claude instance    |
 
-**Rule of thumb:** Use sub-agents for quick, focused workers. Use agent teams when teammates need to share findings, challenge each other, and coordinate on their own.
+**Rule of thumb:** Use sub-agents for quick, focused workers. Use agent teams when teammates need to share findings, challenge each other, and coordinate on their own. And when the work is *structured* fan-out at scale rather than open-ended collaboration, consider a [Dynamic Workflow](#dynamic-workflows) instead.
 
 #### Architecture
 
@@ -1355,9 +1776,3 @@ This educational material is provided under the MIT License.
 ## Contributing
 
 Found an issue or have a suggestion? Open an issue or PR.
-
----
-
-<div align="center">
-
-</div>
