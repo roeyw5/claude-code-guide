@@ -4,7 +4,7 @@
 
 ![Claude Code Fundamentals Banner](images/hero-banner.png)
 
-[![Guide Version](https://img.shields.io/badge/Guide-v2.0-7c3aed?style=for-the-badge&logo=anthropic&logoColor=white)](https://code.claude.com)
+[![Guide Version](https://img.shields.io/badge/Guide-v2.1-7c3aed?style=for-the-badge&logo=anthropic&logoColor=white)](https://code.claude.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![Last Updated](https://img.shields.io/badge/Updated-June%202026-blue?style=for-the-badge)]()
 
@@ -25,14 +25,14 @@
 5. [Plan Mode](#plan-mode)
 6. [Goals & Loops: Working Autonomously](#goals--loops-working-autonomously)
 7. [Extending Claude Code](#extending-claude-code)
-8. [Skills](#skills)
-9. [Sub-Agents](#sub-agents)
-10. [Dynamic Workflows](#dynamic-workflows)
-11. [Hooks](#hooks)
-12. [Going Deeper](#going-deeper)
+    - [Skills](#skills)
+    - [Sub-Agents](#sub-agents)
+    - [Dynamic Workflows](#dynamic-workflows)
+    - [Hooks](#hooks)
+8. [Going Deeper](#going-deeper)
     - [MCP: Model Context Protocol](#mcp-model-context-protocol)
     - [API Key vs Subscription](#api-key-vs-subscription)
-13. [Bonus Features](#bonus-features)
+9. [Bonus Features](#bonus-features)
     - [Settings Optimization](#settings-optimization)
     - [Sandboxing](#sandboxing)
     - [Remote Control](#remote-control)
@@ -57,26 +57,25 @@ If you want the sharpest tool in the shed, this is it.
 | **Multi-File Operations**   | Coordinated changes across files while maintaining consistency |
 | **Real-Time Context**       | Stays updated with your latest changes and git history         |
 
-### Using a Different Tool?
+### Terminal vs IDE Extension
 
-That's okay. The concepts in this module transfer across AI development tools:
+Claude Code runs in two main ways: the **CLI** in your terminal, and the official **VS Code extension** (there's a JetBrains plugin too). It's the same engine with the same configuration—your CLAUDE.md, skills, hooks, sub-agents, and settings work identically in both. The difference is the interface:
 
-| Concept                 | Claude Code        | Other Tools                          |
-| ----------------------- | ------------------ | ------------------------------------ |
-| **Memory files**        | CLAUDE.md          | .cursorrules, Copilot instructions   |
-| **Skills/Commands**     | .claude/skills/    | Agent Skills (open standard)         |
-| **Security guardrails** | Hooks, permissions | Various implementations              |
-| **Context management**  | /clear, /compact   | Universal problem, similar solutions |
+| | Terminal (CLI) | VS Code Extension |
+| --- | --- | --- |
+| **Reviewing changes** | Text diffs in the terminal | Native side-by-side diff viewer |
+| **Giving context** | Type file paths | `@file.ts#5-10` mentions; your editor selection is shared automatically |
+| **Plan Mode** | Plan as terminal text | Plan opens as a markdown doc you can comment on inline |
+| **Checkpoints** | `/rewind` command | Hover any message to rewind code or fork the conversation |
+| **Commands & skills** | Full set | Subset (type `/` to see what's available) |
+| **Automation** | Headless `claude -p`, JSON output, CI pipelines | Not available |
+| **Newest features** | Land here first (fast mode, agent teams) | Often arrive later or not at all |
 
-The mental models you learn here—how to structure AI memory, when to reset context, how to enforce guardrails—apply regardless of which tool you use.
+**Rule of thumb:** the extension shines when you're reviewing Claude's changes visually and working file-by-file inside your editor. The terminal is the full-power surface—complete command set, automation, SSH/tmux workflows. Many developers use both: the extension for interactive feature work, the terminal for everything else.
 
-This module uses Claude Code throughout. If you're on another tool, you'll need adaptations, but the patterns transfer.
-
-> **IDE Options:** There's an official Claude Code extension for VS Code and JetBrains that lets you see your code side-by-side while Claude works. Same tool, visual interface.
+> 💡 Installing the extension does **not** install the `claude` command—it bundles its own private copy of the CLI. Install the CLI separately for terminal use.
 >
-> Take a look in this [YouTube video](https://www.youtube.com/watch?v=0FmT0uasKWw)!
-
----
+> See the extension in action in this [YouTube video](https://www.youtube.com/watch?v=0FmT0uasKWw)!
 
 ### Installation
 
@@ -107,13 +106,28 @@ cd your-project
 claude
 ```
 
-> **Note:** The npm method (`npm install -g @anthropic-ai/claude-code`) is **deprecated**. If migrating from npm, run `claude install` to switch to the native binary.
+> 📝 **Note:** The npm method (`npm install -g @anthropic-ai/claude-code`) is **deprecated**. If migrating from npm, run `claude install` to switch to the native binary.
 
-### Human-in-the-Loop: Permission Tiers
+### Human-in-the-Loop: Permission Modes
 
-Claude asks permission before executing commands. AI makes mistakes—always review before approving.
+Claude asks permission before executing commands. AI makes mistakes—always review before approving. Press **Shift+Tab** to cycle through modes depending on how much you want to supervise:
 
-Use `/permissions` during a session to manage your allowlist interactively.
+![Permission Modes](images/permission-modes.png)
+
+_The mode picker in the [VS Code extension](#terminal-vs-ide-extension); in the terminal the same modes cycle with Shift+Tab._
+
+| Mode (UI label)            | aka            | What it does                                                              |
+| -------------------------- | -------------- | ------------------------------------------------------------------------ |
+| **Ask before edits**       | `default`      | Prompts on first use of each tool; reads run without asking              |
+| **Edit automatically**     | `acceptEdits`  | Auto-approves file edits and routine filesystem commands in the working dir |
+| **Plan mode**              | `plan`         | Claude explores and presents a plan—no edits until you approve (see [Plan Mode](#plan-mode)) |
+| **Auto mode**              | `auto`         | Claude picks the best mode per task (research preview)                   |
+
+Use `/permissions` to manage the rules behind these prompts: **allow** (never ask), **ask** (always confirm), and **deny** (block entirely). Deny wins over ask, which wins over allow.
+
+> ⚠️ A `bypassPermissions` mode disables prompts entirely—only for isolated containers/VMs, and it's not in the normal Shift+Tab cycle (you opt in with a startup flag).
+
+The same picker (shown above) also sets **Effort**—how much reasoning Claude spends per task. That's a separate knob from permissions; see [Effort Levels](#effort-levels) for when to dial it up or down.
 
 ### Essential Commands
 
@@ -145,16 +159,22 @@ Use `/permissions` during a session to manage your allowlist interactively.
 
 Model choice is one of the highest-leverage decisions you make in Claude Code—it controls speed, cost, output quality, and how much autonomy you can safely hand over. Most people either always use the biggest model (burning through limits) or always use the default (leaving capability on the table). A little intentionality goes a long way.
 
+<div align="center">
+
+![Model lineup: cost vs. task complexity](images/model-quadrant.png)
+
+</div>
+
 ### The Current Lineup
 
-| Model        | Alias    | API Price (in/out per million tokens) | Context    | Character                                                        |
-| ------------ | -------- | --------------------------- | -------------------- | ---------------------------------------------------------------- |
-| **Fable 5**  | `fable`  | $10 / $50                   | 1M                   | Most capable. Long autonomous runs, ambiguous "figure it out" work |
-| **Opus 4.8** | `opus`   | $5 / $25                    | 200K (1M via `opus[1m]`; automatic on Max/Team/Enterprise) | Deep reasoning, long-horizon agentic coding |
-| **Sonnet 4.6** | `sonnet` | $3 / $15                  | 200K (1M via `sonnet[1m]`) | Best speed/intelligence balance—the daily driver           |
-| **Haiku 4.5** | `haiku` | $1 / $5                     | 200K                 | Fastest and cheapest. Scoped tasks, sub-agent workers             |
+| Model          | Alias    | API Price (in/out per Mtok) | Context             | Character                                                          |
+| -------------- | -------- | --------------------------- | ------------------- | ----------------------------------------------------------------- |
+| **Fable 5**    | `fable`  | $10 / $50                   | 1M                  | Most capable. Long autonomous runs, ambiguous "figure it out" work |
+| **Opus 4.8**   | `opus`   | $5 / $25                    | 200K (1M via `opus[1m]`) | Deep reasoning, long-horizon agentic coding                  |
+| **Sonnet 4.6** | `sonnet` | $3 / $15                    | 200K (1M via `sonnet[1m]`) | Best speed/intelligence balance—the daily driver           |
+| **Haiku 4.5**  | `haiku`  | $1 / $5                     | 200K                | Fastest and cheapest. Scoped tasks, sub-agent workers              |
 
-> 📝 On a subscription you don't pay these per-token prices directly—they matter when using an API key or usage credits. See [API Key vs Subscription](#api-key-vs-subscription).
+> 📝 The 1M-token window on `opus[1m]` is automatic on Max/Team/Enterprise plans. On a subscription you don't pay the per-token prices directly—they matter when using an API key or usage credits. See [API Key vs Subscription](#api-key-vs-subscription).
 
 ### The Decision Guide
 
@@ -282,7 +302,7 @@ Claude Code loads memory files in order. **Later files override earlier ones:**
 | 5          | **Project Rules** | `./.claude/rules/*.md`                           | Modular project rules (with glob scoping) |
 | 6 (last)   | **Local**         | `./CLAUDE.local.md`                              | Overrides all above                       |
 
-> **Nested Discovery:** Claude also finds CLAUDE.md files in subdirectories. When working in `src/api/`, it loads both `./CLAUDE.md` and `./src/api/CLAUDE.md` automatically.
+> 📝 **Nested Discovery:** Claude also finds CLAUDE.md files in subdirectories. When working in `src/api/`, it loads both `./CLAUDE.md` and `./src/api/CLAUDE.md` automatically.
 
 ### Quick Setup Commands
 
@@ -613,7 +633,7 @@ When satisfied, exit Plan Mode (`Shift+Tab`) and Claude will ask for confirmatio
 
 > 💡 **Tip:** Plan Mode and spec-driven development complement each other. Use Plan Mode for individual implementation tasks within a larger spec-driven project.
 
-### Useful Resources
+### Documentation & Guides
 
 - [Claude Code Common Workflows](https://code.claude.com/docs/en/common-workflows) - Official documentation including Plan Mode
 
@@ -626,6 +646,12 @@ Plan Mode is about supervising Claude *before* work starts. These commands go th
 ### /goal — Work Until a Condition Is Met
 
 `/goal` sets a completion condition, and Claude keeps taking turns until it's met. After each turn, a separate **evaluator** (a small, fast model—Haiku by default) checks whether the condition holds. If not, Claude automatically continues instead of returning control to you.
+
+<div align="center">
+
+![The /goal loop: work, evaluate, done or repeat](images/goal-loop.png)
+
+</div>
 
 ```
 /goal all tests in test/auth pass and the lint step is clean
@@ -724,7 +750,7 @@ Claude Code can be extended beyond CLAUDE.md with four mechanisms. This section 
 
 <div align="center">
 
-![Three Extension Mechanisms](images/three-mechanisms.png)
+![The Four Extension Mechanisms](images/four-mechanisms.png)
 
 </div>
 
@@ -736,8 +762,6 @@ Claude Code can be extended beyond CLAUDE.md with four mechanisms. This section 
 | **Sub-Agent**        | AI-driven     | Claude delegates, or you invoke                     | Parallel/isolated work              |
 | **Dynamic Workflow** | Scripted      | You opt in (`ultracode` keyword or saved workflow)  | Large-scale multi-agent orchestration |
 | **Hook**             | Deterministic | Always, on specific events                          | Enforcement, validation             |
-
-> 📝 The diagram above shows the original three; **Dynamic Workflows** (mid-2026) is the newest addition—covered in its own section below.
 
 ### Quick Decision Guide
 
@@ -955,6 +979,12 @@ This repo ships with ready-to-use skills in [`.claude/skills/`](.claude/skills/)
 
 Sub-agents are specialized Claude instances that work in **isolated context**. They don't see or affect your main conversation until they finish and report back.
 
+<div align="center">
+
+![Sub-Agent Context Isolation](images/sub-agent-isolation.png)
+
+</div>
+
 ### Why Isolation Matters
 
 | Main Conversation                       | Sub-Agent                             |
@@ -1016,14 +1046,20 @@ You are a security-focused reviewer. Check for:
 
 #### Configuration Options
 
-| Option  | Purpose              | Values                                          |
-| ------- | -------------------- | ----------------------------------------------- |
-| `model` | Which Claude model   | `opus`, `sonnet`, `haiku`, `inherit` (parent's) |
-| `tools` | Available tools      | `Read`, `Write`, `Bash`, `Grep`, `Glob`, etc.   |
-| `color` | UI identifier        | `blue`, `orange`, `red`, `green`, `purple`      |
-| `hooks` | Agent-specific hooks | Hook configuration (see Hooks section)          |
+`name` and `description` are required. The most useful optional fields:
+
+| Option            | Purpose                                  | Values                                                       |
+| ----------------- | ---------------------------------------- | ------------------------------------------------------------ |
+| `model`           | Which Claude model                       | `opus`, `sonnet`, `haiku`, `fable`, `inherit` (parent's)     |
+| `tools`           | Available tools (inherits all if omitted) | `Read`, `Write`, `Bash`, `Grep`, `Glob`, etc.               |
+| `permissionMode`  | Default permission mode for the agent    | `default`, `acceptEdits`, `plan`, `bypassPermissions`, etc.  |
+| `memory`          | Persistent memory scope (see below)      | `user`, `project`, `local`                                   |
+| `hooks`           | Agent-specific hooks                     | Hook configuration (see Hooks section)                       |
+| `color`           | UI identifier                            | `blue`, `orange`, `red`, `green`, `purple`                   |
 
 > 💡 **Cost pattern:** put review/worker agents on `haiku` and keep the big model for the main session. For scoped tasks the quality difference is small; the cost difference isn't. See [Models for Sub-Agents](#models-for-sub-agents).
+
+> 📝 **Persistent memory:** add `memory: project` (or `user`/`local`) and the agent reads and writes a memory directory across sessions—so it remembers your conventions instead of starting cold each time.
 
 #### Tool Restrictions
 
@@ -1047,6 +1083,16 @@ Sub-agents can run in the background:
 This is great for long-running analysis while you continue coding.
 
 > 📝 **Nested sub-agents:** as of mid-2026, sub-agents can spawn their own sub-agents (up to 5 levels deep)—enabling hierarchical delegation, like an orchestrator that spawns researchers that spawn specialists.
+
+### Agent View
+
+Once you've backgrounded an agent with `Ctrl+B`, where does it go? Run `claude agents` to open **agent view**—a dashboard of your background sessions, each showing its status (working / needs input / done / failed), a one-line summary, elapsed time, and any associated PR. From there you can peek at output, attach to a session, or stop it.
+
+For scripting, `claude agents --json` prints the active sessions (add `--all` for completed ones)—handy for status checks in your own tooling.
+
+Don't confuse it with two similarly-named things: `/agents` manages your sub-agent **definitions**, and `/workflows` monitors **workflow** runs. Agent view is specifically about background **sessions**.
+
+> 📝 Agent view is a **research preview** (requires Claude Code v2.1.139+).
 
 ### Sub-Agent Example: Documentation Generator
 
@@ -1156,7 +1202,7 @@ This repo ships with one example agent in [`.claude/agents/`](.claude/agents/) t
 
 It's intentionally **read-only** (no Write/Edit). The point of an independent reviewer is to surface findings, not "just fix it" — a reviewer that can edit is no longer a reviewer. See [pr-reviewer.md](.claude/agents/pr-reviewer.md) for the full prompt; it's a good starting template for your own audit agents.
 
-### Useful Resources
+### Documentation & Guides
 
 - [Sub-Agents Documentation](https://docs.anthropic.com/en/docs/claude-code/sub-agents) - Complete guide to creating specialized agents
 - [How to create and use Subagents in Claude Code](https://www.cometapi.com/how-to-create-and-use-subagents-in-claude-code/) - A practical guide
@@ -1167,6 +1213,12 @@ It's intentionally **read-only** (no Write/Edit). The point of an independent re
 ## Dynamic Workflows
 
 Dynamic Workflows (mid-2026) are the newest orchestration layer. You describe a task, Claude writes a **JavaScript orchestration script**, and a separate runtime executes it in the background—spawning dozens to hundreds of sub-agents deterministically while your session stays responsive.
+
+<div align="center">
+
+![Workflow Pipeline: fan out, verify, synthesize](images/workflow-pipeline.png)
+
+</div>
 
 **The mental shift:** with sub-agents, Claude decides what to spawn turn by turn, and every intermediate result flows back through its context. With workflows, *the plan moves out of Claude's head and into a script*—loops, fan-outs, and verification passes are encoded as code, and intermediate results live in script variables instead of the context window.
 
@@ -1420,7 +1472,7 @@ For absolute restrictions (Claude can't even attempt access):
 }
 ```
 
-### Useful Resources
+### Documentation & Guides
 
 - [Hooks Reference](https://docs.anthropic.com/en/docs/claude-code/hooks) - Complete guide to hook events and configuration
 - [YouTube Video](https://www.youtube.com/watch?v=CEODfvJLIGQ) - Hooks overview by Mervin Praison
@@ -1436,6 +1488,12 @@ Two topics that reach beyond day-to-day Claude Code usage—each a world of its 
 ### MCP: Model Context Protocol
 
 Everything in this guide so far extends what Claude *knows* (CLAUDE.md, skills) and *when it acts* (hooks, sub-agents). **MCP extends what Claude can touch.**
+
+<div align="center">
+
+![MCP: Claude Code connecting to external systems](images/mcp-hub.png)
+
+</div>
 
 MCP is an open standard—created by Anthropic, adopted across the industry—for connecting AI tools to external systems: databases, browsers, ticketing systems, internal APIs. Instead of building a custom integration for every tool, an **MCP server** exposes capabilities (tools, resources, prompts) that any **MCP client**—Claude Code, Claude Desktop, and most other AI tools—can use through one protocol.
 
