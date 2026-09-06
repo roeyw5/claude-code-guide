@@ -16,6 +16,7 @@ cp -r commit/ /path/to/your-project/.claude/skills/commit/
 | `drawio/` | `/drawio` | Generate native `.drawio` XML diagrams for VS Code or app.diagrams.net |
 | `html-guide/` | `/html-guide` | Convert a markdown runbook/guide into a styled, self-contained HTML page (handles LTR and Hebrew RTL) |
 | `skill-creator/` | `/skill-creator` | Create, edit, and benchmark skills; optimize descriptions for triggering accuracy |
+| `remind/` | `/remind` | Ten-second briefing of what this session is doing and what it needs from you, for juggling parallel sessions |
 | `update/` | `/update` | Update a `PROGRESS.md` file with session changes |
 
 ## Skill Structure

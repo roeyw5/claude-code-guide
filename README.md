@@ -964,6 +964,7 @@ This repo ships with ready-to-use skills in [`.claude/skills/`](.claude/skills/)
 | `/drawio`        | Generate native `.drawio` diagrams for VS Code or app.diagrams.net                          |
 | `/html-guide`    | Convert a markdown runbook/guide into a styled, self-contained HTML page (LTR + Hebrew RTL) |
 | `/skill-creator` | Create, edit, and benchmark skills; optimize descriptions for triggering accuracy           |
+| `/remind`        | Ten-second briefing of what this session is doing and what it needs from you                |
 | `/update`        | Update a PROGRESS.md file with session changes                                              |
 
 ### Documentation & Guides
