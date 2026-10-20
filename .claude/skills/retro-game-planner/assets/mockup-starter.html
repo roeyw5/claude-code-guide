@@ -1,0 +1,99 @@
+<!doctype html>
+<!--
+  Mockup starter for retro-game-planner.
+  Copy into <game>/mockups/<name>.html, then edit. Throwaway: it exists to make decisions.
+  Layout: fixed-size scene (left) + flexible text panel (right), capped width, centred.
+  Swap the palette variables for the era look being tested; duplicate .option blocks to compare.
+  Replace the placeholder text with the LONGEST real item from the user's content.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Warm 32-bit-handheld-era palette. Swap per option. */
+    --sky: #f6c48e; --ground: #d8c79a; --pad: #c9b07a; --pad-shade: #a88f5c;
+    --ink: #1d2b3a; --line: #34495e; --paper: #fdf8e8; --muted: #5a6b7d;
+    --good: #27ae60; --bad: #c0392b; --focus: #e67e22;
+    --pixel: 'Pixelify Sans', monospace;   /* game chrome: HUD, labels, dialog */
+    --read: 'Nunito', sans-serif;          /* anything the player must read carefully */
+  }
+  body { margin: 0; padding: 24px 16px; background: #202833; color: #e8edf4; font-family: var(--read); }
+  h1, h2 { max-width: 1240px; margin: 0 auto 8px; }
+  .note { max-width: 1240px; margin: 0 auto 16px; color: #9fb0c6; }
+  .option { max-width: 1240px; margin: 0 auto 32px; }
+  .stage { display: flex; align-items: flex-start; border-radius: 12px; overflow: hidden;
+           box-shadow: 0 6px 24px rgba(0,0,0,.35); background: #2b3a4a; }
+  .left { flex: 0 0 600px; display: flex; flex-direction: column; }
+  .scene { position: relative; height: 400px; background: linear-gradient(var(--sky) 0 45%, var(--ground) 45% 100%);
+           font-family: var(--pixel); color: var(--ink); }
+  .pad { position: absolute; border-radius: 50%; background: var(--pad); box-shadow: inset 0 -6px 0 var(--pad-shade); }
+  .hud { position: absolute; background: var(--paper); border: 3px solid var(--line); border-radius: 8px 8px 8px 2px;
+         padding: 6px 10px; min-width: 190px; font-size: 16px; box-shadow: 3px 3px 0 rgba(0,0,0,.25); }
+  .hud small { font-size: 12px; opacity: .75; }
+  .bar { position: relative; height: 8px; border-radius: 4px; background: #455; margin-top: 4px; overflow: hidden; }
+  .bar i { display: block; height: 100%; }
+  .say { position: absolute; left: 10px; right: 10px; bottom: 10px; background: var(--paper); border: 3px solid var(--line);
+         border-radius: 8px; padding: 9px 12px; font-size: 16px; }
+  .under { padding: 14px; }
+  .panel { flex: 1 1 auto; max-width: 640px; min-width: 380px; align-self: stretch; background: var(--paper); color: var(--ink);
+           border-left: 4px solid var(--line); padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+  .meta { display: flex; justify-content: space-between; font-family: var(--pixel); font-size: 14px; color: var(--muted); }
+  .tag { background: var(--line); color: var(--paper); border-radius: 4px; padding: 0 8px; }
+  .text { font-family: var(--read); font-size: 16.5px; line-height: 1.55; font-weight: 600; }
+  .choice { display: flex; gap: 12px; align-items: flex-start; background: #fff; border: 2px solid var(--line); border-radius: 8px;
+            padding: 9px 12px; font-family: var(--read); font-size: 15px; line-height: 1.45; font-weight: 600;
+            box-shadow: 2px 2px 0 rgba(52,73,94,.25); }
+  .choice kbd { font-family: var(--pixel); background: #e6dcc0; border-radius: 4px; padding: 0 7px; font-size: 14px; font-weight: 400; }
+  .choice.focus { border-color: var(--focus); background: #fff4e0; }
+  .choice.right { border-color: var(--good); background: #eefaf1; }
+  .choice.wrong { border-color: var(--bad); background: #fdecea; }
+</style>
+</head>
+<body>
+<h1>Mockup: main screen</h1>
+<p class="note">Question for the player of this mockup goes here, e.g. "Which layout feels right?" Sprites are placeholders.</p>
+
+<div class="option">
+  <h2>A. Scene left, text right</h2>
+  <div class="stage">
+    <div class="left">
+      <div class="scene">
+        <div class="pad" style="right:30px;top:132px;width:180px;height:40px"></div>
+        <div class="pad" style="left:24px;top:292px;width:200px;height:44px"></div>
+        <!-- Opponent: tiny pixel grid. Each rect is one "pixel". -->
+        <svg style="position:absolute;right:66px;top:52px" width="110" height="96" viewBox="0 0 13 11" shape-rendering="crispEdges">
+          <rect x="2" y="1" width="9" height="8" fill="#6c4ab6"/><rect x="3" y="0" width="7" height="1" fill="#3e2a70"/>
+          <rect x="4" y="3" width="2" height="2" fill="#fff"/><rect x="8" y="3" width="2" height="2" fill="#fff"/>
+          <rect x="4" y="4" width="1" height="1" fill="#000"/><rect x="8" y="4" width="1" height="1" fill="#000"/>
+          <rect x="3" y="6" width="7" height="1" fill="#fff"/><rect x="2" y="9" width="2" height="2" fill="#3e2a70"/><rect x="9" y="9" width="2" height="2" fill="#3e2a70"/>
+        </svg>
+        <!-- Player, from behind. -->
+        <svg style="position:absolute;left:64px;top:196px" width="116" height="106" viewBox="0 0 11 10" shape-rendering="crispEdges">
+          <rect x="3" y="0" width="5" height="3" fill="#2c3e50"/><rect x="2" y="3" width="7" height="5" fill="#ff9900"/>
+          <rect x="1" y="4" width="1" height="3" fill="#ffcc80"/><rect x="9" y="4" width="1" height="3" fill="#ffcc80"/>
+          <rect x="3" y="8" width="2" height="2" fill="#34495e"/><rect x="6" y="8" width="2" height="2" fill="#34495e"/>
+        </svg>
+        <div class="hud" style="left:12px;top:14px">OPPONENT <small>Lv 9</small>
+          <div class="bar"><i style="width:60%;background:#f1c40f"></i></div><small>Subtitle</small></div>
+        <div class="hud" style="right:12px;top:214px">YOU <small>Rank</small>
+          <div class="bar"><i style="width:55%;background:#5fd18a"></i></div><small>Score 380</small></div>
+        <div class="say">OPPONENT blocks the way!</div>
+      </div>
+      <div class="under"><!-- feedback / explanation after an action goes here --></div>
+    </div>
+    <div class="panel">
+      <div class="meta"><span>SET 1 &middot; 3 / 15</span><span class="tag">CHOOSE 1</span></div>
+      <div class="text">Paste the longest real item from the user's content here. The panel grows taller; the scene stays fixed.</div>
+      <div class="choice focus"><kbd>1</kbd><span>First choice</span></div>
+      <div class="choice"><kbd>2</kbd><span>Second choice</span></div>
+      <div class="choice right"><kbd>3</kbd><span>Third choice (shown as correct)</span></div>
+      <div class="choice wrong"><kbd>4</kbd><span>Fourth choice (shown as wrong)</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
